@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Neue Frutiger', 'Frutiger', 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+    font-family: 'Neue Frutiger', 'Frutiger', 'Inter', sans-serif;
+    background-color: #ffffff;
+    color: #111827; /* Gray-900 */
+}
+
+/* Ensure inputs inherit font-family */
+input, button, select, textarea {
+    font-family: inherit;
+}
+
+.calendar-day {
+    @apply text-sm text-center rounded-full cursor-pointer transition-all duration-150;
+    width: 28px; 
+    height: 28px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+.calendar-day:hover:not(.day-disabled):not(.day-selected) {
+    @apply bg-blue-100 text-blue-700 font-bold;
+}
+.day-current-month {
+    @apply text-gray-900;
+}
+.day-disabled {
+    @apply text-gray-300 cursor-not-allowed;
+}
+.day-selected {
+    @apply bg-blue-600 text-white font-bold shadow-sm;
+}
+.calendar-grid {
+     display: grid;
+     grid-template-columns: repeat(7, 1fr);
+}
+
+/* Styles for custom searchable dropdown */
+.bond-option {
+    @apply px-3 py-2 cursor-pointer hover:bg-gray-100 text-gray-900;
+}
+.bond-option.active {
+    @apply bg-blue-600 text-white;
+}
+.day-title {
+    @apply text-center text-xs font-bold text-gray-500 pb-2;
+}

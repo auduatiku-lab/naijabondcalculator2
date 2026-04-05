@@ -1,0 +1,5 @@
+{
+  "name": "Nigerian Bonds Price Calculator",
+  "description": "A comprehensive calculator for Nigerian government bonds, supporting forward and reverse price calculations.",
+  "requestFramePermissions": []
+}
