@@ -679,6 +679,10 @@ export default function App() {
                         selectBond(parseInt(activeOption.dataset.index || "-1"));
                     }
                     bondOptionsContainer.classList.add('hidden');
+                } else {
+                    // If options are hidden, move to next field
+                    e.preventDefault();
+                    yieldToMaturityInput.focus();
                 }
                 break;
             case 'Escape':
@@ -694,6 +698,13 @@ export default function App() {
     });
 
 
+    settlementDateInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            bondCleanPriceInput.focus();
+        }
+    });
+
     calendarToggle?.addEventListener('click', toggleCalendar); 
     settlementDateInput?.addEventListener('click', toggleCalendar);
     
@@ -703,7 +714,7 @@ export default function App() {
     faceValueInput.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
             event.preventDefault();
-            yieldToMaturityInput.focus();
+            bondSearchInput.focus();
         }
     });
     faceValueInput.addEventListener('input', calculateBondPrice);
@@ -718,7 +729,7 @@ export default function App() {
     yieldToMaturityInput.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
             event.preventDefault();
-            bondCleanPriceInput.focus();
+            settlementDateInput.focus();
         }
     });
     yieldToMaturityInput.addEventListener('input', calculateBondPrice);
@@ -746,7 +757,7 @@ export default function App() {
     considerationCalculatedInput.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
             event.preventDefault();
-            bondSearchInput.focus();
+            faceValueInput.focus();
         }
     });
     considerationCalculatedInput.addEventListener('input', calculateFromConsideration);
