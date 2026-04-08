@@ -235,7 +235,7 @@ export default function App() {
     function getDayDifference(d1: Date, d2: Date) {
         const t1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
         const t2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
-        return Math.floor((t2 - t1) / MS_PER_DAY);
+        return Math.round((t2 - t1) / MS_PER_DAY);
     }
 
     /**
@@ -329,20 +329,20 @@ export default function App() {
         // AI = (Coupon / Frequency) * (Days since LCC / Days in Period)
         // Bloomberg typically uses high precision for AI, often 8 or 10 decimal places.
         const AI_raw = (E > 0) ? Coup * (A / E) : 0;
-        const AI = Math.round(AI_raw * 1e10) / 1e10;
+        const AI = Math.round(AI_raw * 1e12) / 1e12;
 
-        // For the Consideration (Settlement Amount), Bloomberg uses the dirty price 
-        // rounded to 8 decimal places.
-        const dirty_price_rounded = Math.round(dirty_price * 1e8) / 1e8;
+        // For the Consideration (Settlement Amount), we use the high-precision dirty price
+        // to ensure exact alignment with Bloomberg's settlement amount for large face values.
+        const dirty_price_for_consideration = dirty_price;
         
-        const clean_price_raw = dirty_price_rounded - AI;
+        const clean_price_raw = dirty_price_for_consideration - AI;
         
         // Quoted Clean Price is rounded to 2 decimal places for display
         const clean_price = Math.round(clean_price_raw * 100) / 100;
         
         return {
             cleanPrice: Math.max(0, clean_price),
-            dirtyPrice: Math.max(0, dirty_price_rounded),
+            dirtyPrice: Math.max(0, dirty_price_for_consideration),
             accruedInterest: Math.max(0, AI),
             debug: { A, E, AI, clean_price_raw, dirty_price_raw: dirty_price }
         };
@@ -416,8 +416,10 @@ export default function App() {
             COUPON_FREQUENCY
         );
 
-        // Calculate consideration and round to 2 decimal places to match Bloomberg's settlement amount
-        const consideration = Math.round((dirtyPrice / 100) * faceValue * 100) / 100;
+        // Calculate consideration and truncate to 2 decimal places to match Bloomberg's settlement amount
+        // We multiply first to maintain precision before truncating (dirtyPrice is per 100)
+        // Using Math.floor ensures we match Bloomberg's truncation behavior for large face values.
+        const consideration = Math.floor(dirtyPrice * faceValue) / 100;
         
         // Detailed logging for the user to compare with Bloomberg's "GP" or "YA" screens
         console.log('--- BOND CALCULATION DEBUG ---');
