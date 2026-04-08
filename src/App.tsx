@@ -297,8 +297,14 @@ export default function App() {
         }
         
         const frac_exp = (E > 0) ? DSC / E : 0;
-        let dirty_price = 0.0;
+        
+        // Bloomberg/ISMA Rule: If there is only one coupon remaining (N=1), 
+        // use the Simple Interest formula instead of Compound Interest.
+        if (N === 1) {
+            return (redemption + Coup) / (1 + r * frac_exp);
+        }
 
+        let dirty_price = 0.0;
         for (let k = 1; k <= N; k++) {
             const exponent = (k - 1) + frac_exp;
             dirty_price += Coup / Math.pow(1 + r, exponent);
