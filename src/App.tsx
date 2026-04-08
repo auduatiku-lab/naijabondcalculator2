@@ -16,6 +16,10 @@ export default function App() {
   const calendarPopoverRef = useRef<HTMLDivElement>(null);
   const calendarToggleRef = useRef<HTMLButtonElement>(null);
   const settlementDateInputRef = useRef<HTMLInputElement>(null);
+  const settlementDateRef = useRef(selectedSettlementDate);
+  useEffect(() => {
+    settlementDateRef.current = selectedSettlementDate;
+  }, [selectedSettlementDate]);
 
   function toggleCalendar(event: any) {
     if (event) {
@@ -46,6 +50,7 @@ export default function App() {
 
   function handleDateSelection(newDate: Date, isInitialLoad = false) {
     setSelectedSettlementDate(newDate);
+    settlementDateRef.current = newDate; // Update ref immediately to avoid stale data in calculations
     const settlementDateInput = settlementDateInputRef.current;
     if (settlementDateInput) {
         settlementDateInput.value = newDate.toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -53,19 +58,9 @@ export default function App() {
 
     if (!isInitialLoad) {
         setIsCalendarOpen(false);
-        // Trigger calculation after state update
-        // We'll use a custom event or just call the function if it's accessible
-        const calculateBtn = document.getElementById('calculateBtn');
-        if (calculateBtn) {
-            (calculateBtn as HTMLButtonElement).click();
-        } else {
-            // Fallback: try to find the calculate function in the window if it's exposed, 
-            // but since it's in useEffect, we might need a different approach.
-            // For now, let's assume the user will interact with other fields or we can 
-            // trigger a custom event that the useEffect listener picks up.
-            const event = new CustomEvent('calculateBond');
-            document.dispatchEvent(event);
-        }
+        // Trigger calculation after state update via custom event
+        const event = new CustomEvent('calculateBond');
+        document.dispatchEvent(event);
     }
   }
 
@@ -237,37 +232,39 @@ export default function App() {
         return num * multiplier;
     }
 
+    function getDayDifference(d1: Date, d2: Date) {
+        const t1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+        const t2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+        return Math.floor((t2 - t1) / MS_PER_DAY);
+    }
+
     /**
      * Finds LCC (Last Coupon Date) and NCC (Next Coupon Date) using standard rolling logic.
+     * Aligned with ICMA standards for semi-annual FGN Bonds.
      */
     function findCouponDates(settlement: Date, maturity: Date, frequency: number) {
-        const monthsInterval = 12 / frequency;
-        const maturityDay = maturity.getDate();
+        let next = new Date(maturity);
+        let last = new Date(maturity);
         
-        let lcc = new Date(maturity);
-        lcc.setHours(0, 0, 0, 0);
-
-        while (lcc.getTime() > settlement.getTime()) {
-            let tempMonth = lcc.getMonth() - monthsInterval;
-            lcc.setMonth(tempMonth);
-            if (lcc.getDate() !== maturityDay) {
-                lcc = new Date(lcc.getFullYear(), lcc.getMonth() + 1, 0); 
+        // Roll back from maturity until we find the coupon date ON or BEFORE settlement
+        while (next.getTime() > settlement.getTime()) {
+            last = new Date(next);
+            const m = next.getMonth();
+            const y = next.getFullYear();
+            const step = 12 / frequency;
+            let targetM = m - step;
+            let targetY = y;
+            if (targetM < 0) { targetM += 12; targetY -= 1; }
+            next = new Date(targetY, targetM, maturity.getDate());
+            
+            // Snap to maturity day, handling month-end roll-over
+            if (next.getDate() !== maturity.getDate()) {
+                next = new Date(targetY, targetM + 1, 0);
             }
+            next.setHours(0, 0, 0, 0);
         }
         
-        let ncc = new Date(lcc);
-        ncc.setMonth(lcc.getMonth() + monthsInterval);
-
-        if (ncc.getDate() !== maturityDay) {
-             ncc = new Date(ncc.getFullYear(), ncc.getMonth() + 1, 0); 
-        }
-        
-        if (ncc.getTime() > maturity.getTime()) {
-             ncc = new Date(maturity);
-             ncc.setHours(0, 0, 0, 0);
-        }
-        
-        return { lcc, ncc };
+        return { lcc: next, ncc: last };
     }
     
     // --- Pricing Logic Helper (Yield -> Price) ---
@@ -279,28 +276,27 @@ export default function App() {
         if (settlement.getTime() >= maturity.getTime()) return redemption;
 
         const { lcc, ncc } = findCouponDates(settlement, maturity, F);
-        const E = (ncc.getTime() - lcc.getTime()) / MS_PER_DAY;
-        const DSC = (settlement.getTime() - lcc.getTime()) / MS_PER_DAY;
+        const E = getDayDifference(lcc, ncc);
+        const DSC = getDayDifference(settlement, ncc);
         
         let N = 0;
-        if (ncc.getTime() <= maturity.getTime()) {
-            let tempDate = new Date(ncc);
-            while(tempDate.getTime() <= maturity.getTime()) {
-                N++;
-                let currentMonth = tempDate.getMonth();
-                tempDate.setMonth(currentMonth + (12/F));
-                if (tempDate.getDate() !== maturity.getDate()) {
-                    let tempYear = tempDate.getFullYear();
-                    let expectedMonth = (ncc.getMonth() + N * (12/F)) % 12;
-                    tempDate = new Date(tempYear, tempDate.getMonth(), maturity.getDate());
-                     if (tempDate.getMonth() !== expectedMonth) {
-                         tempDate = new Date(tempYear, expectedMonth + 1, 0);
-                     }
-                }
+        let tempDate = new Date(ncc);
+        while (tempDate.getTime() <= maturity.getTime()) {
+            N++;
+            const m = tempDate.getMonth();
+            const y = tempDate.getFullYear();
+            const step = 12 / F;
+            let targetM = m + step;
+            let targetY = y;
+            if (targetM >= 12) { targetM -= 12; targetY += 1; }
+            tempDate = new Date(targetY, targetM, maturity.getDate());
+            if (tempDate.getDate() !== maturity.getDate()) {
+                tempDate = new Date(targetY, targetM + 1, 0);
             }
+            tempDate.setHours(0, 0, 0, 0);
         }
         
-        const frac_exp = (E > 0) ? (E-DSC) / E : 0;
+        const frac_exp = (E > 0) ? DSC / E : 0;
         let dirty_price = 0.0;
 
         for (let k = 1; k <= N; k++) {
@@ -315,36 +311,48 @@ export default function App() {
 
     // --- Main Forward Calculation (Yield -> Price) ---
     function calculate_user_bond_price(settlement: Date, maturity: Date, C: number, Y: number, F: number) {
-        const dirty_price = getInitialDirtyPrice(settlement, maturity, C, Y, F);
-
         if (settlement.getTime() >= maturity.getTime()) {
             return { cleanPrice: REDEMPTION_VALUE_PER_100, dirtyPrice: REDEMPTION_VALUE_PER_100, accruedInterest: 0 };
         }
+
+        const dirty_price = getInitialDirtyPrice(settlement, maturity, C, Y, F);
         
-        const { lcc } = findCouponDates(settlement, maturity, F);
-        const A = (settlement.getTime() - lcc.getTime()) / MS_PER_DAY;
+        const { lcc, ncc } = findCouponDates(settlement, maturity, F);
+        
+        // Day count for Accrued Interest (Actual/Actual ICMA)
+        const A = getDayDifference(lcc, settlement);
+        const E = getDayDifference(lcc, ncc);
+        
         const redemption = REDEMPTION_VALUE_PER_100;
         const Coup = (redemption * C) / F;
-        const { ncc } = findCouponDates(settlement, maturity, F);
-        const E = (ncc.getTime() - lcc.getTime()) / MS_PER_DAY;
-        const AI = (E > 0) ? Coup * (A / E) : 0;
+        
+        // AI = (Coupon / Frequency) * (Days since LCC / Days in Period)
+        // Bloomberg typically uses high precision for AI, often 8 or 10 decimal places.
+        const AI_raw = (E > 0) ? Coup * (A / E) : 0;
+        const AI = Math.round(AI_raw * 1e10) / 1e10;
 
-        const clean_price_raw = dirty_price - AI;
-        const clean_price = parseFloat(clean_price_raw.toFixed(2));
-        const recalculated_dirty_price = clean_price + AI;
-
+        // For the Consideration (Settlement Amount), Bloomberg uses the dirty price 
+        // rounded to 8 decimal places.
+        const dirty_price_rounded = Math.round(dirty_price * 1e8) / 1e8;
+        
+        const clean_price_raw = dirty_price_rounded - AI;
+        
+        // Quoted Clean Price is rounded to 2 decimal places for display
+        const clean_price = Math.round(clean_price_raw * 100) / 100;
+        
         return {
             cleanPrice: Math.max(0, clean_price),
-            dirtyPrice: Math.max(0, recalculated_dirty_price),
-            accruedInterest: Math.max(0, AI)
+            dirtyPrice: Math.max(0, dirty_price_rounded),
+            accruedInterest: Math.max(0, AI),
+            debug: { A, E, AI, clean_price_raw, dirty_price_raw: dirty_price }
         };
     }
     
     // --- Main Reverse Calculation (Price -> Yield) ---
     function calculateYieldFromPrice(targetCleanPrice: number, settlement: Date, maturity: Date, C: number, F: number) {
         const { lcc, ncc } = findCouponDates(settlement, maturity, F);
-        const E = (ncc.getTime() - lcc.getTime()) / MS_PER_DAY;
-        const A = (settlement.getTime() - lcc.getTime()) / MS_PER_DAY;
+        const E = Math.round((ncc.getTime() - lcc.getTime()) / MS_PER_DAY);
+        const A = Math.round((settlement.getTime() - lcc.getTime()) / MS_PER_DAY);
         const redemption = REDEMPTION_VALUE_PER_100;
         const Coup = (redemption * C) / F;
         const AI = (E > 0) ? Coup * (A / E) : 0;
@@ -389,6 +397,10 @@ export default function App() {
         const yieldToMaturity = parseFloat(yieldToMaturityInput.value) / 100;
         const maturityDateStr = maturityDateInput.value;
         const maturity = parseMaturityDate(maturityDateStr);
+        
+        // Use the ref to get the latest settlement date, avoiding stale closure issues
+        const settlementDate = new Date(settlementDateRef.current);
+        settlementDate.setHours(0, 0, 0, 0);
 
         if (isNaN(faceValue) || isNaN(couponRate) || isNaN(yieldToMaturity) ||
             faceValue <= 0 || couponRate < 0 || yieldToMaturity < 0 || isNaN(maturity.getTime())) {
@@ -396,15 +408,49 @@ export default function App() {
             return;
         }
 
-        const { cleanPrice, dirtyPrice } = calculate_user_bond_price(
-            selectedSettlementDate, 
+        const { cleanPrice, dirtyPrice, accruedInterest, debug } = calculate_user_bond_price(
+            settlementDate, 
             maturity, 
             couponRate, 
             yieldToMaturity, 
             COUPON_FREQUENCY
         );
 
-        const consideration = (dirtyPrice / 100) * faceValue;
+        // Calculate consideration and round to 2 decimal places to match Bloomberg's settlement amount
+        const consideration = Math.round((dirtyPrice / 100) * faceValue * 100) / 100;
+        
+        // Detailed logging for the user to compare with Bloomberg's "GP" or "YA" screens
+        console.log('--- BOND CALCULATION DEBUG ---');
+        console.log('Settlement Date:', settlementDate.toDateString());
+        console.log('Maturity Date:', maturity.toDateString());
+        console.log('Last Coupon Date (LCC):', findCouponDates(settlementDate, maturity, COUPON_FREQUENCY).lcc.toDateString());
+        console.log('Next Coupon Date (NCC):', findCouponDates(settlementDate, maturity, COUPON_FREQUENCY).ncc.toDateString());
+        console.log('Days since LCC (A):', debug.A);
+        console.log('Days in Period (E):', debug.E);
+        console.log('Accrued Interest:', debug.AI.toFixed(8));
+        console.log('Clean Price (Raw):', debug.clean_price_raw.toFixed(8));
+        console.log('Clean Price (2dp):', cleanPrice);
+        console.log('Dirty Price (Calc):', dirtyPrice.toFixed(8));
+        console.log('Consideration:', consideration.toFixed(2));
+        console.log('------------------------------');
+        console.log('Face Value:', faceValue);
+        console.log('Coupon Rate:', couponRate * 100 + '%');
+        console.log('Yield to Maturity:', yieldToMaturity * 100 + '%');
+        
+        const { lcc, ncc } = findCouponDates(settlementDate, maturity, COUPON_FREQUENCY);
+        const A_days = Math.round((settlementDate.getTime() - lcc.getTime()) / MS_PER_DAY);
+        const E_days = Math.round((ncc.getTime() - lcc.getTime()) / MS_PER_DAY);
+        
+        console.log('Last Coupon (LCC):', lcc.toDateString());
+        console.log('Next Coupon (NCC):', ncc.toDateString());
+        console.log('Days since LCC (A):', A_days);
+        console.log('Days in Period (E):', E_days);
+        console.log('Accrued Interest (AI):', accruedInterest.toFixed(10));
+        console.log('Clean Price (Rounded):', cleanPrice.toFixed(2));
+        console.log('Dirty Price (Used for Consideration):', dirtyPrice.toFixed(10));
+        console.log('Final Consideration:', consideration.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+        console.log('------------------------------');
+
         removePendingState(cleanPrice, dirtyPrice, consideration);
     }
 
@@ -429,6 +475,7 @@ export default function App() {
         const couponRate = parseFloat(couponRateInput.value) / 100;
         const maturityDateStr = maturityDateInput.value;
         const maturity = parseMaturityDate(maturityDateStr);
+        const settlementDate = settlementDateRef.current;
         
         if (isNaN(cleanPrice) || isNaN(couponRate) || isNaN(maturity.getTime()) || cleanPrice <= 0) {
              if (bondCleanPriceInput.value.trim() === '' || parseNaira(bondCleanPriceInput.value) === 0) {
@@ -438,7 +485,7 @@ export default function App() {
             return;
         }
 
-        const calculatedYield = calculateYieldFromPrice(cleanPrice, selectedSettlementDate, maturity, couponRate, COUPON_FREQUENCY);
+        const calculatedYield = calculateYieldFromPrice(cleanPrice, settlementDate, maturity, couponRate, COUPON_FREQUENCY);
         yieldToMaturityInput.value = (calculatedYield * 100).toFixed(4);
         
         // After finding the yield, call the core forward calculation to update all fields
@@ -459,6 +506,7 @@ export default function App() {
         const couponRate = parseFloat(couponRateInput.value) / 100;
         const maturityDateStr = maturityDateInput.value;
         const maturity = parseMaturityDate(maturityDateStr);
+        const settlementDate = settlementDateRef.current;
 
         if (isNaN(consideration) || isNaN(faceValue) || isNaN(couponRate) || isNaN(maturity.getTime()) || consideration <= 0 || faceValue <= 0) {
             if (considerationCalculatedInput.value.trim() === '' || parseNaira(considerationCalculatedInput.value) === 0) {
@@ -472,8 +520,8 @@ export default function App() {
         const targetDirtyPrice = (consideration / faceValue) * 100;
 
         // We need Accrued Interest to find the clean price from the dirty price.
-        const { lcc, ncc } = findCouponDates(selectedSettlementDate, maturity, COUPON_FREQUENCY);
-        const A = (selectedSettlementDate.getTime() - lcc.getTime()) / MS_PER_DAY;
+        const { lcc, ncc } = findCouponDates(settlementDate, maturity, COUPON_FREQUENCY);
+        const A = (settlementDate.getTime() - lcc.getTime()) / MS_PER_DAY;
         const redemption = REDEMPTION_VALUE_PER_100;
         const Coup = (redemption * couponRate) / COUPON_FREQUENCY;
         const E = (ncc.getTime() - lcc.getTime()) / MS_PER_DAY;
@@ -481,7 +529,7 @@ export default function App() {
 
         const targetCleanPrice = targetDirtyPrice - AI;
         
-        const calculatedYield = calculateYieldFromPrice(targetCleanPrice, selectedSettlementDate, maturity, couponRate, COUPON_FREQUENCY);
+        const calculatedYield = calculateYieldFromPrice(targetCleanPrice, settlementDate, maturity, couponRate, COUPON_FREQUENCY);
         yieldToMaturityInput.value = (calculatedYield * 100).toFixed(4);
         
         // After finding the yield, call the core forward calculation to update all fields
@@ -638,7 +686,7 @@ export default function App() {
             const bond = bonds[selectedBondIndex];
             couponRateInput.value = formatTwoDecimals(bond.couponRate);
             maturityDateInput.value = bond.maturityDate;
-            calculateYearsToMaturityAndDisplay(selectedSettlementDate, bond.maturityDate);
+            calculateYearsToMaturityAndDisplay(settlementDateRef.current, bond.maturityDate);
             
             couponRateInput.readOnly = true;
             maturityDateInput.readOnly = true;
@@ -777,14 +825,14 @@ export default function App() {
     
     maturityDateInput.addEventListener('input', () => {
          if (selectedBondIndex === -1) {
-             calculateYearsToMaturityAndDisplay(selectedSettlementDate, maturityDateInput.value);
+             calculateYearsToMaturityAndDisplay(settlementDateRef.current, maturityDateInput.value);
              calculateBondPrice();
          }
     });
 
     // Run initialization on load
     // 1. Set default settlement date
-    handleDateSelection(selectedSettlementDate, true); 
+    handleDateSelection(settlementDateRef.current, true); 
 
     // 2. Load with no default bond selected
     selectBond(-1);
@@ -847,7 +895,6 @@ export default function App() {
                             <path d="M3 10h18"/>
                         </svg>
                     </button>
-                    {/* Calendar Popover moved below for better positioning */}
                 </div>
                 
                 {/* Calendar Popover */}
