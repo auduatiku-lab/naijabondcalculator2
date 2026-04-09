@@ -150,7 +150,7 @@ export default function App() {
         { name: "15.4500% FGN BOND JUN 2038", couponRate: 15.45, maturityDate: "21-JUN-2038" },
         { name: "13.0000% FGN BOND JAN 2042", couponRate: 13.00, maturityDate: "21-JAN-2042" },
         { name: "9.8000% FGN BOND JUL 2045", couponRate: 9.80, maturityDate: "24-JUL-2045" },
-        { name: "14.8000% FGN BOND APR 2049", couponRate: 14.80, maturityDate: "25-APR-2049" },
+        { name: "14.8000% FGN BOND APR 2049", couponRate: 14.80, maturityDate: "26-APR-2049" },
         { name: "12.9800% FGN BOND MAR 2050", couponRate: 12.98, maturityDate: "27-MAR-2050" },
         { name: "15.7000% FGN BOND JUN 2053", couponRate: 15.70, maturityDate: "21-JUN-2053" }
     ].filter(bond => parseMaturityDate(bond.maturityDate).getTime() >= today.getTime());
