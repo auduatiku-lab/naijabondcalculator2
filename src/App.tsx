@@ -150,7 +150,7 @@ export default function App() {
         { name: "15.4500% FGN BOND JUN 2038", couponRate: 15.45, maturityDate: "21-JUN-2038" },
         { name: "13.0000% FGN BOND JAN 2042", couponRate: 13.00, maturityDate: "21-JAN-2042" },
         { name: "9.8000% FGN BOND JUL 2045", couponRate: 9.80, maturityDate: "24-JUL-2045" },
-        { name: "14.8000% FGN BOND APR 2049", couponRate: 14.80, maturityDate: "26-APR-2049" },
+        { name: "14.8000% FGN BOND APR 2049", couponRate: 14.80, maturityDate: "25-APR-2049" },
         { name: "12.9800% FGN BOND MAR 2050", couponRate: 12.98, maturityDate: "27-MAR-2050" },
         { name: "15.7000% FGN BOND JUN 2053", couponRate: 15.70, maturityDate: "21-JUN-2053" }
     ].filter(bond => parseMaturityDate(bond.maturityDate).getTime() >= today.getTime());
@@ -298,12 +298,6 @@ export default function App() {
         
         const frac_exp = (E > 0) ? DSC / E : 0;
         
-        // Bloomberg/ISMA Rule: If there is only one coupon remaining (N=1), 
-        // use the Simple Interest formula instead of Compound Interest.
-        if (N === 1) {
-            return (redemption + Coup) / (1 + r * frac_exp);
-        }
-
         let dirty_price = 0.0;
         for (let k = 1; k <= N; k++) {
             const exponent = (k - 1) + frac_exp;
