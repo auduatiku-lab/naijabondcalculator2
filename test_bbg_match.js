@@ -27,69 +27,103 @@ function findCouponDates(settlement, maturity, frequency) {
 }
 
 const faceValue = 500000000;
-const targetCons = 521718248.92;
-const targetCP = 99.56;
+const targetCons = 571852891.25;
+const targetCP = 80.43;
 
 const tradeDate = new Date(2026, 3, 9); // April 9
-const maturity = new Date(2026, 5, 13); // June 13
-const C = 0.145;
-const Y = 0.1624;
-const F = 1;
+const maturity = new Date(2034, 1, 21); // Feb 21, 2034
+const C = 0.19;
+const Y = 0.1625;
+const F = 2;
 
-console.log("Brute forcing 14.5% June 2026 bond...");
+console.log("Testing 12.98% Mar 2050 bond...");
 
 const formulas = ["Simple", "Compound"];
 const dayCounts = ["ACT/ACT", "ACT/365", "30/360"];
 const offsets = [0, 1, 2, 3, 4, 5];
 
-for (let formula of formulas) {
-    for (let dayCount of dayCounts) {
-        for (let offset of offsets) {
-            const settlement = new Date(tradeDate);
-            settlement.setDate(tradeDate.getDate() + offset);
-            
-            const { lcc, ncc } = findCouponDates(settlement, maturity, F);
-            
-            let A, E, DSC;
-            if (dayCount === "ACT/ACT") {
-                A = getDayDifference(lcc, settlement);
-                E = getDayDifference(lcc, ncc);
-                DSC = getDayDifference(settlement, ncc);
-            } else if (dayCount === "ACT/365") {
-                A = getDayDifference(lcc, settlement);
-                E = 365 / F;
-                DSC = getDayDifference(settlement, ncc);
-            } else if (dayCount === "30/360") {
-                const d1 = lcc.getDate();
-                const m1 = lcc.getMonth() + 1;
-                const y1 = lcc.getFullYear();
-                const d2 = settlement.getDate();
-                const m2 = settlement.getMonth() + 1;
-                const y2 = settlement.getFullYear();
-                A = (y2 - y1) * 360 + (m2 - m1) * 30 + (d2 - d1);
-                E = 180;
-                DSC = 180 - A;
-            }
-            
-            const Coup = (100 * C) / F;
-            const r = Y / F;
-            const ai = Coup * (A / E);
-            
-            let dp;
-            if (formula === "Simple") {
-                dp = (100 + Coup) / (1 + r * (DSC / E));
-            } else {
-                dp = (100 + Coup) / Math.pow(1 + r, DSC / E);
-            }
-            
+for (let mDay = 21; mDay <= 21; mDay++) {
+    const maturity = new Date(2034, 1, mDay);
+    if (maturity.getMonth() !== 1) continue;
+
+    for (let formula of formulas) {
+        for (let dayCount of dayCounts) {
+            for (let offset of offsets) {
+                const settlement = new Date(tradeDate);
+                settlement.setDate(tradeDate.getDate() + offset);
+                
+                const { lcc, ncc } = findCouponDates(settlement, maturity, F);
+                
+                let A, E, DSC;
+                if (dayCount === "ACT/ACT") {
+                    A = getDayDifference(lcc, settlement);
+                    E = getDayDifference(lcc, ncc);
+                    DSC = getDayDifference(settlement, ncc);
+                } else if (dayCount === "ACT/365") {
+                    A = getDayDifference(lcc, settlement);
+                    E = 365 / F;
+                    DSC = getDayDifference(settlement, ncc);
+                } else if (dayCount === "30/360") {
+                    const d1 = lcc.getDate();
+                    const m1 = lcc.getMonth() + 1;
+                    const y1 = lcc.getFullYear();
+                    const d2 = settlement.getDate();
+                    const m2 = settlement.getMonth() + 1;
+                    const y2 = settlement.getFullYear();
+                    A = (y2 - y1) * 360 + (m2 - m1) * 30 + (d2 - d1);
+                    E = 180;
+                    DSC = 180 - A;
+                }
+                
+                const Coup = (100 * C) / F;
+                const r = Y / F;
+                const frac = Math.round((DSC / E) * 1e10) / 1e10;
+                const ai_frac = Math.round((A / E) * 1e10) / 1e10;
+                const ai = Coup * ai_frac;
+                
+                let dp;
+                if (formula === "Simple") {
+                    dp = (100 + Coup) / (1 + r * frac);
+                } else {
+                    // Compound for far away bonds
+                    let N = 0;
+                    let tempDate = new Date(ncc);
+                    while (tempDate.getTime() <= maturity.getTime()) {
+                        N++;
+                        const m = tempDate.getMonth();
+                        const y = tempDate.getFullYear();
+                        const step = 12 / F;
+                        let targetM = m + step;
+                        let targetY = y;
+                        if (targetM >= 12) { targetM -= 12; targetY += 1; }
+                        tempDate = new Date(targetY, targetM, maturity.getDate());
+                        if (tempDate.getDate() !== maturity.getDate()) {
+                            tempDate = new Date(targetY, targetM + 1, 0);
+                        }
+                        tempDate.setHours(0, 0, 0, 0);
+                    }
+                    // Round frac to 8dp
+                    const frac = Math.round((DSC / E) * 1e8) / 1e8;
+                    dp = 0;
+                    for (let k = 1; k <= N; k++) {
+                        const term = Coup / Math.pow(1 + r, k - 1 + frac);
+                        dp += term;
+                    }
+                    const finalTerm = 100 / Math.pow(1 + r, N - 1 + frac);
+                    dp += finalTerm;
+                }
+                
             const cp = dp - ai;
-            const cons = Math.floor(dp * faceValue) / 100;
+            const cp_rounded = Math.round(cp * 1e8) / 1e8;
+            const ai_rounded = Math.round(ai * 1e8) / 1e8;
+            const dp_settlement = cp_rounded + ai_rounded;
+            const raw_cons = (dp_settlement * faceValue) / 100;
             
-            const diff = Math.abs(cons - targetCons);
-            if (diff < 100000) {
-                console.log(`Match found! Formula: ${formula}, DayCount: ${dayCount}, Offset: ${offset}`);
+            if (Math.abs(raw_cons - targetCons) < 1) {
+                console.log(`Match! Day: ${mDay}, Formula: ${formula}, DayCount: ${dayCount}, Offset: ${offset}`);
                 console.log(`  Settlement: ${settlement.toDateString()}`);
-                console.log(`  CP: ${cp.toFixed(4)}, Cons: ${cons.toFixed(2)}, Diff: ${diff.toFixed(2)}`);
+                console.log(`  Raw Cons: ${raw_cons.toFixed(8)}`);
+            }
             }
         }
     }
