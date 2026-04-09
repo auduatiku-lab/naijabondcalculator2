@@ -686,7 +686,7 @@ export default function App() {
             setYearsToMaturityPendingState('Awaiting Maturity Date');
         } else {
             const bond = bonds[selectedBondIndex];
-            couponRateInput.value = formatTwoDecimals(bond.couponRate);
+            couponRateInput.value = bond.couponRate.toString();
             maturityDateInput.value = bond.maturityDate;
             calculateYearsToMaturityAndDisplay(settlementDateRef.current, bond.maturityDate);
             
@@ -820,9 +820,8 @@ export default function App() {
     
     couponRateInput.addEventListener('input', calculateBondPrice);
     couponRateInput.addEventListener('blur', (event: any) => {
-        if (selectedBondIndex === -1 && event.target.value !== '') {
-            event.target.value = formatTwoDecimals(event.target.value);
-        }
+        // We don't round the coupon rate on blur to preserve high-precision rates (e.g. 12.1493%)
+        // Just ensure it's a valid number if needed, but calculateBondPrice already handles validation.
     });
     
     maturityDateInput.addEventListener('input', () => {
