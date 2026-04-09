@@ -416,10 +416,10 @@ export default function App() {
             COUPON_FREQUENCY
         );
 
-        // Calculate consideration and floor to 2 decimal places to match Bloomberg's settlement amount
-        // We multiply first to maintain precision before flooring (dirtyPrice is per 100)
-        // Using Math.floor ensures we match Bloomberg's rounding behavior for large face values.
-        const consideration = Math.floor(dirtyPrice * faceValue) / 100;
+        // Calculate consideration and round to 2 decimal places to match Bloomberg's settlement amount
+        // We multiply first to maintain precision before rounding (dirtyPrice is per 100)
+        // Using Math.round ensures we match Bloomberg's rounding behavior for most bonds.
+        const consideration = Math.round(dirtyPrice * faceValue) / 100;
         
         // Detailed logging for the user to compare with Bloomberg's "GP" or "YA" screens
         console.log('--- BOND CALCULATION DEBUG ---');
