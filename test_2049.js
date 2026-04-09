@@ -1,11 +1,10 @@
 
 const faceValue = 500000000;
-const targetCons = 490784576.58;
+const targetCons = 422844694.13;
 const settlement = new Date(2026, 3, 10); // April 10, 2026
-const maturity = new Date(2049, 3, 26); // April 26, 2049
-const couponRate = 0.148;
+const maturity = new Date(2042, 0, 21); // Jan 21, 2042
+const couponRate = 0.13;
 const yieldRate = 0.1623;
-const cleanPrice = 91.41;
 
 function getDayDifference(d1, d2) {
     const MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -79,8 +78,18 @@ const ai = Coup * (A / E);
 console.log(`AI: ${ai}`);
 const cleanPriceCalc = dirtyPriceCalc - ai;
 console.log(`Clean Price (Calc): ${cleanPriceCalc}`);
+console.log(`Clean Price (Rounded): ${Math.round(cleanPriceCalc * 100) / 100}`);
 
 const consideration = (dirtyPriceCalc * faceValue) / 100;
-console.log(`Consideration: ${consideration.toFixed(2)}`);
+console.log(`Consideration (Unrounded DP): ${consideration.toFixed(2)}`);
+
+const considerationRoundedDP = (Math.round(dirtyPriceCalc * 100000000) / 100000000 * faceValue) / 100;
+console.log(`Consideration (8dp DP): ${considerationRoundedDP.toFixed(2)}`);
+
+const considerationFloor = Math.floor(dirtyPriceCalc * faceValue) / 100;
+console.log(`Consideration (Floor): ${considerationFloor.toFixed(2)}`);
+
+const considerationRound = Math.round(dirtyPriceCalc * faceValue) / 100;
+console.log(`Consideration (Round): ${considerationRound.toFixed(2)}`);
+
 console.log(`Target: ${targetCons.toFixed(2)}`);
-console.log(`Diff: ${(consideration - targetCons).toFixed(2)}`);
