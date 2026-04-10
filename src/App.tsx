@@ -301,10 +301,12 @@ export default function App() {
         let dirty_price = 0.0;
         for (let k = 1; k <= N; k++) {
             const exponent = (k - 1) + frac_exp;
-            dirty_price += Coup / Math.pow(1 + r, exponent);
+            let term = Coup / Math.pow(1 + r, exponent);
             if (k === N) {
-                dirty_price += redemption / Math.pow(1 + r, exponent);
+                term += redemption / Math.pow(1 + r, exponent);
             }
+            // Round each term to 10 decimal places to match Bloomberg precision
+            dirty_price += Math.round(term * 10000000000) / 10000000000;
         }
         return dirty_price;
     }
@@ -416,10 +418,10 @@ export default function App() {
             COUPON_FREQUENCY
         );
 
-        // Calculate consideration and floor to 2 decimal places to match Bloomberg's settlement amount
-        // We multiply first to maintain precision before flooring (dirtyPrice is per 100)
-        // Using Math.floor ensures we match Bloomberg's rounding behavior for large face values.
-        const consideration = Math.floor(dirtyPrice * faceValue) / 100;
+        // Calculate consideration and round to 2 decimal places to match Bloomberg's settlement amount
+        // We multiply first to maintain precision before rounding (dirtyPrice is per 100)
+        // Using Math.round matches Bloomberg's observed behavior for most FGN bonds.
+        const consideration = Math.round(dirtyPrice * faceValue) / 100;
         
         // Detailed logging for the user to compare with Bloomberg's "GP" or "YA" screens
         console.log('--- BOND CALCULATION DEBUG ---');
