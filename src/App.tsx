@@ -428,12 +428,13 @@ export default function App() {
             COUPON_FREQUENCY
         );
 
-        // Calculate consideration and round to 2 decimal places to match Bloomberg's settlement amount
-        // We multiply first to maintain precision before rounding (dirtyPrice is per 100)
-        // Using Math.round matches Bloomberg's observed behavior for most FGN bonds.
-        // We round the dirty price to 10 decimal places first to align with Bloomberg's internal precision.
-        const roundedDirtyPrice = Math.round(dirtyPrice * 10000000000) / 10000000000;
-        const consideration = Math.round(roundedDirtyPrice * faceValue) / 100;
+        // Bloomberg calculates the total consideration by summing the rounded Principal and rounded Accrued Interest amounts.
+        // 1. Principal Amount = Face Value * (Clean Price / 100), rounded to 2 decimal places.
+        const principalAmount = Math.round(faceValue * debug.clean_price_raw) / 100;
+        // 2. Accrued Interest Amount = Face Value * (Accrued Interest / 100), rounded to 2 decimal places.
+        const aiAmount = Math.round(faceValue * accruedInterest) / 100;
+        // 3. Total Consideration = Principal Amount + Accrued Interest Amount.
+        const consideration = principalAmount + aiAmount;
         
         // Detailed logging for the user to compare with Bloomberg's "GP" or "YA" screens
         console.log('--- BOND CALCULATION DEBUG ---');
