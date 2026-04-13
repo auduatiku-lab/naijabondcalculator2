@@ -306,7 +306,7 @@ export default function App() {
             tempDate.setHours(0, 0, 0, 0);
         }
         
-        const frac_exp = (E > 0) ? DSC / E : 0;
+        const frac_exp = (E > 0) ? Math.round((DSC / E) * 10000000000) / 10000000000 : 0;
         
         let dirty_price = 0.0;
         for (let k = 1; k <= N; k++) {
@@ -431,7 +431,9 @@ export default function App() {
         // Calculate consideration and round to 2 decimal places to match Bloomberg's settlement amount
         // We multiply first to maintain precision before rounding (dirtyPrice is per 100)
         // Using Math.round matches Bloomberg's observed behavior for most FGN bonds.
-        const consideration = Math.round(dirtyPrice * faceValue) / 100;
+        // We round the dirty price to 10 decimal places first to align with Bloomberg's internal precision.
+        const roundedDirtyPrice = Math.round(dirtyPrice * 10000000000) / 10000000000;
+        const consideration = Math.round(roundedDirtyPrice * faceValue) / 100;
         
         // Detailed logging for the user to compare with Bloomberg's "GP" or "YA" screens
         console.log('--- BOND CALCULATION DEBUG ---');
