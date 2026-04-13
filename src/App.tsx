@@ -206,6 +206,16 @@ export default function App() {
             maximumFractionDigits: 12
         }).format(number);
     }
+    function formatCouponRate(value: any) {
+        const num = parseFloat(value);
+        if (isNaN(num)) return '';
+        return num.toFixed(4) + '%';
+    }
+    function parseCouponRate(formattedStr: string) {
+        if (!formattedStr) return 0;
+        const cleanStr = String(formattedStr).replace(/%/g, '').trim();
+        return parseFloat(cleanStr);
+    }
     function parseNaira(formattedStr: string) {
         if (!formattedStr) return 0;
         const cleanStr = String(formattedStr).replace(/,/g, '');
@@ -395,7 +405,7 @@ export default function App() {
      */
     function _calculateAndDisplayBondPrice() {
         const faceValue = parseFinancialInput(faceValueInput.value); 
-        const couponRate = parseFloat(couponRateInput.value) / 100;
+        const couponRate = parseCouponRate(couponRateInput.value) / 100;
         const yieldToMaturity = parseFloat(yieldToMaturityInput.value) / 100;
         const maturityDateStr = maturityDateInput.value;
         const maturity = parseMaturityDate(maturityDateStr);
@@ -476,7 +486,7 @@ export default function App() {
         isUpdating = true;
         
         const cleanPrice = parseNaira(bondCleanPriceInput.value);
-        const couponRate = parseFloat(couponRateInput.value) / 100;
+        const couponRate = parseCouponRate(couponRateInput.value) / 100;
         const maturityDateStr = maturityDateInput.value;
         const maturity = parseMaturityDate(maturityDateStr);
         const settlementDate = settlementDateRef.current;
@@ -507,7 +517,7 @@ export default function App() {
 
         const consideration = parseNaira(considerationCalculatedInput.value);
         const faceValue = parseFinancialInput(faceValueInput.value);
-        const couponRate = parseFloat(couponRateInput.value) / 100;
+        const couponRate = parseCouponRate(couponRateInput.value) / 100;
         const maturityDateStr = maturityDateInput.value;
         const maturity = parseMaturityDate(maturityDateStr);
         const settlementDate = settlementDateRef.current;
@@ -688,7 +698,7 @@ export default function App() {
             setYearsToMaturityPendingState('Awaiting Maturity Date');
         } else {
             const bond = bonds[selectedBondIndex];
-            couponRateInput.value = bond.couponRate.toString();
+            couponRateInput.value = formatCouponRate(bond.couponRate);
             maturityDateInput.value = bond.maturityDate;
             calculateYearsToMaturityAndDisplay(settlementDateRef.current, bond.maturityDate);
             
@@ -822,8 +832,10 @@ export default function App() {
     
     couponRateInput.addEventListener('input', calculateBondPrice);
     couponRateInput.addEventListener('blur', (event: any) => {
-        // We don't round the coupon rate on blur to preserve high-precision rates (e.g. 12.1493%)
-        // Just ensure it's a valid number if needed, but calculateBondPrice already handles validation.
+        const value = parseCouponRate(event.target.value);
+        if (!isNaN(value) && event.target.value !== '') {
+            event.target.value = formatCouponRate(value);
+        }
     });
     
     maturityDateInput.addEventListener('input', () => {
@@ -857,7 +869,7 @@ export default function App() {
   return (
     <div className="flex items-center justify-center min-h-screen antialiased p-4" style={{ fontFamily: "'Neue Frutiger', 'Frutiger', 'Inter', sans-serif" }}>
       {/* Main Container */}
-      <div className="w-full max-w-xl bg-white border border-gray-200 rounded-xl shadow-xl p-6 sm:p-8 space-y-6">
+      <div className="w-full max-w-xl bg-white border border-gray-200 rounded-xl shadow-xl pt-3 sm:pt-4 px-6 sm:px-8 pb-6 sm:pb-8 space-y-6">
         {/* Input Form */}
         <div className="space-y-4">
             {/* Face Value */}
@@ -987,7 +999,7 @@ export default function App() {
             {/* Coupon Rate */}
             <div>
                 <label htmlFor="couponRate" className="block text-sm font-semibold text-gray-700">Coupon Rate (%)</label>
-                <input type="number" step="any" id="couponRate" placeholder="To be Determined" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
+                <input type="text" id="couponRate" placeholder="To be Determined" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
             </div>
 
             {/* Maturity Date */}
