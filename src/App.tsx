@@ -129,6 +129,7 @@ export default function App() {
         { name: "14.55% FGN OLD BOND APR 2029", couponRate: 14.55, maturityDate: "26-APR-2029" },
         { name: "12.49% FGN BOND MAY 2029", couponRate: 12.49, maturityDate: "22-MAY-2029" },
         { name: "8.50% FGN BOND NOV 2029", couponRate: 8.50, maturityDate: "20-NOV-2029" },
+        { name: "9.75% FGN BOND SEP 2029", couponRate: 9.75, maturityDate: "06-SEP-2029" },
         { name: "10.00% FGN BOND JUL 2030", couponRate: 10.00, maturityDate: "23-JUL-2030" },
         { name: "17.945% FGN BOND AUG 2030", couponRate: 17.945, maturityDate: "27-AUG-2030" },
         { name: "18.5000% FGN BOND FEB 2031", couponRate: 18.50, maturityDate: "21-FEB-2031" },
@@ -306,7 +307,7 @@ export default function App() {
             tempDate.setHours(0, 0, 0, 0);
         }
         
-        const frac_exp = (E > 0) ? Math.round((DSC / E) * 10000000000) / 10000000000 : 0;
+        const frac_exp = (E > 0) ? (DSC / E) : 0;
         
         let dirty_price = 0.0;
         for (let k = 1; k <= N; k++) {
@@ -363,8 +364,8 @@ export default function App() {
     // --- Main Reverse Calculation (Price -> Yield) ---
     function calculateYieldFromPrice(targetCleanPrice: number, settlement: Date, maturity: Date, C: number, F: number) {
         const { lcc, ncc } = findCouponDates(settlement, maturity, F);
-        const E = Math.round((ncc.getTime() - lcc.getTime()) / MS_PER_DAY);
-        const A = Math.round((settlement.getTime() - lcc.getTime()) / MS_PER_DAY);
+        const E = getDayDifference(lcc, ncc);
+        const A = getDayDifference(lcc, settlement);
         const redemption = REDEMPTION_VALUE_PER_100;
         const Coup = (redemption * C) / F;
         const AI = (E > 0) ? Coup * (A / E) : 0;
