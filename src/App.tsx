@@ -139,7 +139,7 @@ export default function App() {
         { name: "17.95% FGN BOND JUN 2032", couponRate: 17.95, maturityDate: "25-JUN-2032" },
         { name: "15.64% FGN SUKUK BOND DEC 2032", couponRate: 15.64, maturityDate: "02-DEC-2032" },
         { name: "19.8900% FGN BOND MAY 2033", couponRate: 19.89, maturityDate: "15-MAY-2033" },
-        { name: "14.7000% FGN BOND JUN 2033", couponRate: 14.70, maturityDate: "20-JUN-2033" },
+        { name: "14.7000% FGN BOND JUN 2033", couponRate: 14.70, maturityDate: "21-JUN-2033" },
         { name: "10.00% FGN BOND AUG 2033", couponRate: 10.00, maturityDate: "16-AUG-2033" },
         { name: "15.7500% FGN SUKUK BOND OCT 2033", couponRate: 15.75, maturityDate: "13-OCT-2033" },
         { name: "19.0000% FGN BOND FEB 2034", couponRate: 19.00, maturityDate: "21-FEB-2034" },
