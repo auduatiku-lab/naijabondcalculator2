@@ -315,8 +315,7 @@ export default function App() {
             if (k === N) {
                 term += redemption / Math.pow(1 + r, exponent);
             }
-            // Round each term to 10 decimal places to match Bloomberg precision
-            dirty_price += Math.round(term * 10000000000) / 10000000000;
+            dirty_price += term;
         }
         return dirty_price;
     }
