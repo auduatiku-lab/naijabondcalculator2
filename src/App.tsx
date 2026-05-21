@@ -321,13 +321,11 @@ export default function App() {
     }
 
     // --- Main Forward Calculation (Yield -> Price) ---
-    function calculate_user_bond_price(settlement: Date, maturity: Date, C: number, Y: number, F: number) {
+    function calculate_user_bond_price(settlement: Date, maturity: Date, C: number, Y: number, F: number, overrideCleanPrice?: number) {
         if (settlement.getTime() >= maturity.getTime()) {
             return { cleanPrice: REDEMPTION_VALUE_PER_100, dirtyPrice: REDEMPTION_VALUE_PER_100, accruedInterest: 0 };
         }
 
-        const dirty_price = getInitialDirtyPrice(settlement, maturity, C, Y, F);
-        
         const { lcc, ncc } = findCouponDates(settlement, maturity, F);
         
         // Day count for Accrued Interest (Actual/Actual ICMA)
@@ -342,11 +340,17 @@ export default function App() {
         const AI_raw = (E > 0) ? Coup * (A / E) : 0;
         const AI = Math.round(AI_raw * 1e12) / 1e12;
 
-        // For the Consideration (Settlement Amount), we use the high-precision dirty price
-        // to ensure exact alignment with Bloomberg's settlement amount for large face values.
-        const dirty_price_for_consideration = dirty_price;
-        
-        const clean_price_raw = dirty_price_for_consideration - AI;
+        let clean_price_raw: number;
+        let dirty_price_for_consideration: number;
+
+        if (overrideCleanPrice !== undefined) {
+            clean_price_raw = overrideCleanPrice;
+            dirty_price_for_consideration = overrideCleanPrice + AI;
+        } else {
+            const dirty_price = getInitialDirtyPrice(settlement, maturity, C, Y, F);
+            dirty_price_for_consideration = dirty_price;
+            clean_price_raw = dirty_price_for_consideration - AI;
+        }
         
         // Quoted Clean Price is rounded to 2 decimal places for display
         const clean_price = Math.round(clean_price_raw * 100) / 100;
@@ -355,7 +359,7 @@ export default function App() {
             cleanPrice: Math.max(0, clean_price),
             dirtyPrice: Math.max(0, dirty_price_for_consideration),
             accruedInterest: Math.max(0, AI),
-            debug: { A, E, AI, clean_price_raw, dirty_price_raw: dirty_price }
+            debug: { A, E, AI, clean_price_raw, dirty_price_raw: dirty_price_for_consideration }
         };
     }
     
@@ -402,7 +406,7 @@ export default function App() {
      * Core forward calculation logic. Reads inputs, calculates all values, and updates the UI.
      * This function is called by the event handler wrappers.
      */
-    function _calculateAndDisplayBondPrice() {
+    function _calculateAndDisplayBondPrice(overrideCleanPrice?: number) {
         const faceValue = parseFinancialInput(faceValueInput.value); 
         const couponRate = parseCouponRate(couponRateInput.value) / 100;
         const yieldToMaturity = parseFloat(yieldToMaturityInput.value) / 100;
@@ -424,7 +428,8 @@ export default function App() {
             maturity, 
             couponRate, 
             yieldToMaturity, 
-            COUPON_FREQUENCY
+            COUPON_FREQUENCY,
+            overrideCleanPrice
         );
 
         // Bloomberg calculates the total consideration by summing the rounded Principal and rounded Accrued Interest amounts.
@@ -505,7 +510,7 @@ export default function App() {
         yieldToMaturityInput.value = (calculatedYield * 100).toFixed(4);
         
         // After finding the yield, call the core forward calculation to update all fields
-        _calculateAndDisplayBondPrice();
+        _calculateAndDisplayBondPrice(cleanPrice);
         
         isUpdating = false;
     }
@@ -549,7 +554,7 @@ export default function App() {
         yieldToMaturityInput.value = (calculatedYield * 100).toFixed(4);
         
         // After finding the yield, call the core forward calculation to update all fields
-        _calculateAndDisplayBondPrice();
+        _calculateAndDisplayBondPrice(targetCleanPrice);
 
         isUpdating = false;
     }
