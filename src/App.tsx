@@ -174,8 +174,9 @@ export default function App() {
     const bondCleanPriceInput = document.getElementById('calculatedBondPriceInput') as HTMLInputElement; 
     const bondDirtyPriceInput = document.getElementById('bondDirtyPriceInput') as HTMLInputElement; 
     const considerationCalculatedInput = document.getElementById('considerationCalculatedInput') as HTMLInputElement;
+    const fullCleanPriceInput = document.getElementById('fullCleanPriceInput') as HTMLInputElement;
     
-    const outputInputs = [bondCleanPriceInput, bondDirtyPriceInput, considerationCalculatedInput];
+    const outputInputs = [bondCleanPriceInput, bondDirtyPriceInput, considerationCalculatedInput, fullCleanPriceInput];
 
     const calendarToggle = calendarToggleRef.current;
     const calendarPopover = calendarPopoverRef.current;
@@ -196,6 +197,22 @@ export default function App() {
         return new Intl.NumberFormat('en-NG', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2 // Standard currency formatting
+        }).format(number);
+    }
+    function getDecimalPlaces(value: any): number {
+        const str = String(value);
+        const parts = str.split('.');
+        if (parts.length > 1) {
+            return parts[1].length;
+        }
+        return 0;
+    }
+    function formatNairaWithDp(value: any, maxDp = 2) {
+        const number = parseFloat(value);
+        if (isNaN(number)) return '0.00';
+        return new Intl.NumberFormat('en-NG', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: maxDp
         }).format(number);
     }
     function formatDirtyPrice(value: any) {
@@ -472,7 +489,7 @@ export default function App() {
         console.log('Final Consideration:', consideration.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         console.log('------------------------------');
 
-        removePendingState(cleanPrice, dirtyPrice, consideration);
+        removePendingState(cleanPrice, dirtyPrice, consideration, debug.clean_price_raw, overrideCleanPrice);
     }
 
     /**
@@ -569,22 +586,32 @@ export default function App() {
             considerationCalculatedInput.value = PENDING_MESSAGE;
         }
         bondDirtyPriceInput.value = PENDING_MESSAGE;
+        fullCleanPriceInput.value = PENDING_MESSAGE;
         
 
-        [bondDirtyPriceInput].forEach(input => {
+        [bondDirtyPriceInput, fullCleanPriceInput].forEach(input => {
             input.classList.add('text-gray-400', 'font-normal'); 
             input.classList.remove('text-gray-900');
         });
     }
-    function removePendingState(cleanPrice: number, dirtyPrice: number, consideration: number) {
+    function removePendingState(cleanPrice: number, dirtyPrice: number, consideration: number, cleanPriceRaw?: number, overrideCleanPrice?: number) {
          // Only update the clean price input if the user is not currently editing it.
         if (document.activeElement !== bondCleanPriceInput) {
-            bondCleanPriceInput.value = formatNaira(cleanPrice);
+            if (overrideCleanPrice !== undefined) {
+                const dps = getDecimalPlaces(overrideCleanPrice);
+                bondCleanPriceInput.value = formatNairaWithDp(overrideCleanPrice, Math.max(2, dps));
+            } else {
+                bondCleanPriceInput.value = formatNaira(cleanPrice);
+            }
         }
         if (document.activeElement !== considerationCalculatedInput) {
             considerationCalculatedInput.value = formatNaira(consideration);
         }
         bondDirtyPriceInput.value = formatDirtyPrice(dirtyPrice);
+        
+        if (cleanPriceRaw !== undefined) {
+            fullCleanPriceInput.value = cleanPriceRaw.toFixed(15);
+        }
 
         outputInputs.forEach(input => {
             input.classList.remove('text-gray-400', 'italic', 'font-normal');
@@ -819,7 +846,8 @@ export default function App() {
     bondCleanPriceInput.addEventListener('blur', (event: any) => {
         const value = parseNaira(event.target.value);
          if (!isNaN(value)) {
-            event.target.value = formatNaira(value);
+            const dps = getDecimalPlaces(event.target.value);
+            event.target.value = formatNairaWithDp(value, Math.max(2, dps));
         }
     });
 
@@ -995,6 +1023,12 @@ export default function App() {
             <div>
                 <label htmlFor="considerationCalculatedInput" className="block text-sm font-semibold text-gray-700">Consideration (Total ₦)</label>
                 <input type="text" id="considerationCalculatedInput" defaultValue="0.00" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
+            </div>
+
+            {/* 4. FULL CLEAN PRICE */}
+            <div>
+                <label htmlFor="fullCleanPriceInput" className="block text-sm font-semibold text-gray-700">Full Clean Price (15 d.p. ₦)</label>
+                <input type="text" id="fullCleanPriceInput" defaultValue="0.000000000000000" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm font-mono text-sm" readOnly />
             </div>
 
             {/* 2. BOND DIRTY PRICE CALCULATED */}
