@@ -215,6 +215,14 @@ export default function App() {
             maximumFractionDigits: maxDp
         }).format(number);
     }
+    function formatNairaTo6(value: any) {
+        const number = parseFloat(value);
+        if (isNaN(number)) return '0.000000';
+        return new Intl.NumberFormat('en-NG', {
+            minimumFractionDigits: 6,
+            maximumFractionDigits: 6
+        }).format(number);
+    }
     function formatDirtyPrice(value: any) {
         const number = parseFloat(value);
         if (isNaN(number)) return '0.00';
@@ -369,8 +377,8 @@ export default function App() {
             clean_price_raw = dirty_price_for_consideration - AI;
         }
         
-        // Quoted Clean Price is rounded to 2 decimal places for display
-        const clean_price = Math.round(clean_price_raw * 100) / 100;
+        // Quoted Clean Price is rounded to 6 decimal places for display
+        const clean_price = Math.round(clean_price_raw * 1000000) / 1000000;
         
         return {
             cleanPrice: Math.max(0, clean_price),
@@ -601,7 +609,7 @@ export default function App() {
                 const dps = getDecimalPlaces(overrideCleanPrice);
                 bondCleanPriceInput.value = formatNairaWithDp(overrideCleanPrice, Math.max(2, dps));
             } else {
-                bondCleanPriceInput.value = formatNaira(cleanPrice);
+                bondCleanPriceInput.value = formatNairaTo6(cleanPrice);
             }
         }
         if (document.activeElement !== considerationCalculatedInput) {
@@ -1015,8 +1023,8 @@ export default function App() {
 
             {/* 1. BOND CLEAN PRICE CALCULATED */}
             <div>
-                <label htmlFor="calculatedBondPriceInput" className="block text-sm font-semibold text-gray-700">Clean Price Computed (₦)</label>
-                <input type="text" id="calculatedBondPriceInput" defaultValue="0.00" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 font-medium focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
+                <label htmlFor="calculatedBondPriceInput" className="block text-sm font-semibold text-gray-700">Clean Price Computed (6 d.p. ₦)</label>
+                <input type="text" id="calculatedBondPriceInput" defaultValue="0.000000" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 font-medium focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
             </div>
 
             {/* 3. CONSIDERATION CALCULATED */}
