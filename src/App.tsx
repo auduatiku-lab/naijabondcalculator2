@@ -158,6 +158,7 @@ export default function App() {
     let isUpdating = false; // Flag to prevent calculation loops
     let selectedBondIndex = -1; // New state for custom dropdown
     let activeOptionIndex = -1; // For keyboard navigation
+    let backspaceCount = 0; // Track consecutive backspaces for fast deletion
 
 
     // --- DOM Elements ---
@@ -459,11 +460,13 @@ export default function App() {
 
         // Bloomberg calculates the total consideration by summing the rounded Principal and rounded Accrued Interest amounts.
         // 1. Principal Amount = Face Value * (Clean Price / 100), rounded to 2 decimal places.
-        const principalAmount = Math.round(faceValue * debug.clean_price_raw) / 100;
-        // 2. Accrued Interest Amount = Face Value * (Accrued Interest / 100), rounded to 2 decimal places.
-        const aiAmount = Math.round(faceValue * accruedInterest) / 100;
-        // 3. Total Consideration = Principal Amount + Accrued Interest Amount.
-        const consideration = principalAmount + aiAmount;
+        // We use the 6 d.p. Clean Price (cleanPrice) instead of the raw infinite precision clean price.
+        const principalAmount = Math.round(faceValue * cleanPrice) / 100;
+        // 2. Total Consideration = Face Value * (Dirty Price / 100), rounded to 2 decimal places.
+        // Bloomberg calculates the total consideration directly using the unrounded/highest-precision Dirty Price.
+        const consideration = Math.round(faceValue * dirtyPrice) / 100;
+        // 3. Accrued Interest Amount = Total Consideration - Principal Amount.
+        const aiAmount = consideration - principalAmount;
         
         // Detailed logging for the user to compare with Bloomberg's "GP" or "YA" screens
         console.log('--- BOND CALCULATION DEBUG ---');
@@ -475,7 +478,7 @@ export default function App() {
         console.log('Days in Period (E):', debug.E);
         console.log('Accrued Interest:', debug.AI.toFixed(8));
         console.log('Clean Price (Raw):', debug.clean_price_raw.toFixed(8));
-        console.log('Clean Price (2dp):', cleanPrice);
+        console.log('Clean Price (6dp):', cleanPrice);
         console.log('Dirty Price (Calc):', dirtyPrice.toFixed(8));
         console.log('Consideration:', consideration.toFixed(2));
         console.log('------------------------------');
@@ -492,7 +495,7 @@ export default function App() {
         console.log('Days since LCC (A):', A_days);
         console.log('Days in Period (E):', E_days);
         console.log('Accrued Interest (AI):', accruedInterest.toFixed(10));
-        console.log('Clean Price (Rounded):', cleanPrice.toFixed(2));
+        console.log('Clean Price (Rounded):', cleanPrice.toFixed(6));
         console.log('Dirty Price (Used for Consideration):', dirtyPrice.toFixed(10));
         console.log('Final Consideration:', consideration.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         console.log('------------------------------');
@@ -703,6 +706,7 @@ export default function App() {
         } else {
              bondSearchInput.value = '';
         }
+        backspaceCount = 0;
         updateBondDetails();
     }
     function updateActiveOption(direction: number) {
@@ -754,12 +758,29 @@ export default function App() {
     // Custom bond select listeners
     bondSearchInput.addEventListener('input', () => filterBonds(bondSearchInput.value));
     bondSearchInput.addEventListener('focus', () => {
+        backspaceCount = 0;
         // Show the full dropdown by passing an empty string
         filterBonds('');
     });
     
     bondSearchInput.addEventListener('keydown', (e) => {
         const optionsVisible = !bondOptionsContainer.classList.contains('hidden');
+
+        if (e.key === 'Backspace') {
+            if (bondSearchInput.value.length > 0) {
+                backspaceCount++;
+                if (backspaceCount >= 2) {
+                    e.preventDefault();
+                    bondSearchInput.value = '';
+                    filterBonds('');
+                    selectBond(-1);
+                    backspaceCount = 0;
+                    return;
+                }
+            }
+        } else {
+            backspaceCount = 0;
+        }
 
         switch (e.key) {
             case 'ArrowDown':

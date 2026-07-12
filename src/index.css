@@ -44,7 +44,7 @@ input, button, select, textarea {
 
 /* Styles for custom searchable dropdown */
 .bond-option {
-    @apply px-3 py-2 cursor-pointer hover:bg-gray-100 text-gray-900;
+    @apply px-3 py-[2px] cursor-pointer hover:bg-gray-100 text-gray-900;
 }
 .bond-option.active {
     @apply bg-blue-600 text-white;
