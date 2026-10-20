@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 
 export default function App() {
+  const [currencySymbol, setCurrencySymbol] = useState('₦');
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedSettlementDate, setSelectedSettlementDate] = useState(() => {
     const d = new Date();
@@ -153,7 +154,8 @@ export default function App() {
         { name: "9.8000% FGN BOND JUL 2045", couponRate: 9.80, maturityDate: "24-JUL-2045" },
         { name: "14.8000% FGN BOND APR 2049", couponRate: 14.80, maturityDate: "26-APR-2049" },
         { name: "12.9800% FGN BOND MAR 2050", couponRate: 12.98, maturityDate: "27-MAR-2050" },
-        { name: "15.7000% FGN BOND JUN 2053", couponRate: 15.70, maturityDate: "21-JUN-2053" }
+        { name: "15.7000% FGN BOND JUN 2053", couponRate: 15.70, maturityDate: "21-JUN-2053" },
+        { name: "12.5000% KENYAN BOND MAR 2056", couponRate: 12.50, maturityDate: "13-MAR-2056", alias: "KENYA TREASURY BOND FXD1/2026/030 13 MAR 2056", currency: "KShs" }
     ].filter(bond => parseMaturityDate(bond.maturityDate).getTime() >= today.getTime());
     
     let isUpdating = false; // Flag to prevent calculation loops
@@ -245,7 +247,7 @@ export default function App() {
     }
     function parseNaira(formattedStr: string) {
         if (!formattedStr) return 0;
-        const cleanStr = String(formattedStr).replace(/,/g, '');
+        const cleanStr = String(formattedStr).replace(/[₦,]/g, '').replace(/kshs?/gi, '').replace(/kes/gi, '').replace(/ngn/gi, '').trim();
         return parseFloat(cleanStr);
     }
 
@@ -253,7 +255,7 @@ export default function App() {
         if (typeof valueStr !== 'string' || valueStr.trim() === '') {
             return 0;
         }
-        let cleanStr = valueStr.toLowerCase().trim().replace(/,/g, '');
+        let cleanStr = valueStr.toLowerCase().trim().replace(/,/g, '').replace(/₦/g, '').replace(/kshs?/gi, '').replace(/kes/gi, '').replace(/ngn/gi, '').trim();
         let multiplier = 1;
 
         if (cleanStr.endsWith('b')) {
@@ -261,6 +263,9 @@ export default function App() {
             cleanStr = cleanStr.slice(0, -1);
         } else if (cleanStr.endsWith('m')) {
             multiplier = 1e6;
+            cleanStr = cleanStr.slice(0, -1);
+        } else if (cleanStr.endsWith('k')) {
+            multiplier = 1e3;
             cleanStr = cleanStr.slice(0, -1);
         }
 
@@ -677,9 +682,14 @@ export default function App() {
     // --- Custom Searchable Dropdown Logic ---
     function filterBonds(searchTerm: string) {
         bondOptionsContainer.classList.remove('hidden');
-        const filteredBonds = bonds.filter(bond => 
-            bond.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        const term = searchTerm.toLowerCase().trim();
+        const filteredBonds = bonds.filter(bond => {
+            const nameMatch = bond.name.toLowerCase().includes(term);
+            const dateMatch = bond.maturityDate.toLowerCase().includes(term) ||
+                              bond.maturityDate.toLowerCase().replace(/-/g, ' ').includes(term);
+            const aliasMatch = (bond as any).alias ? (bond as any).alias.toLowerCase().includes(term) : false;
+            return nameMatch || dateMatch || aliasMatch;
+        });
         renderBondOptions(filteredBonds);
     }
     function renderBondOptions(bondsToRender: any[]) {
@@ -736,8 +746,23 @@ export default function App() {
         }
     }
     
+    function updateCurrencyDisplay(currency: string) {
+        setCurrencySymbol(currency);
+        const faceValueLabel = document.getElementById('faceValueLabel');
+        if (faceValueLabel) faceValueLabel.textContent = `Face Value (${currency})`;
+        const cleanPriceLabel = document.getElementById('cleanPriceLabel');
+        if (cleanPriceLabel) cleanPriceLabel.textContent = `Clean Price Computed (6 d.p. ${currency})`;
+        const considerationLabel = document.getElementById('considerationLabel');
+        if (considerationLabel) considerationLabel.textContent = `Consideration (Total ${currency})`;
+        const fullCleanPriceLabel = document.getElementById('fullCleanPriceLabel');
+        if (fullCleanPriceLabel) fullCleanPriceLabel.textContent = `Full Clean Price (15 d.p. ${currency})`;
+        const dirtyPriceLabel = document.getElementById('dirtyPriceLabel');
+        if (dirtyPriceLabel) dirtyPriceLabel.textContent = `Dirty Price Computed (${currency})`;
+    }
+
     function updateBondDetails() {
         if (selectedBondIndex === -1) {
+            updateCurrencyDisplay('₦');
             couponRateInput.value = '';
             maturityDateInput.value = ''; 
             couponRateInput.placeholder = 'To be Determined';
@@ -745,6 +770,8 @@ export default function App() {
             setYearsToMaturityPendingState('Awaiting Maturity Date');
         } else {
             const bond = bonds[selectedBondIndex];
+            const isKenyan = (bond as any).currency === 'KShs' || bond.name.toUpperCase().includes('KENYA');
+            updateCurrencyDisplay(isKenyan ? 'KShs' : '₦');
             couponRateInput.value = formatCouponRate(bond.couponRate);
             maturityDateInput.value = bond.maturityDate;
             calculateYearsToMaturityAndDisplay(settlementDateRef.current, bond.maturityDate);
@@ -803,6 +830,11 @@ export default function App() {
                     const activeOption = bondOptionsContainer.querySelector('.bond-option.active') as HTMLElement;
                     if (activeOption) {
                         selectBond(parseInt(activeOption.dataset.index || "-1"));
+                    } else {
+                        const firstOption = bondOptionsContainer.querySelector('.bond-option') as HTMLElement;
+                        if (firstOption && firstOption.dataset.index) {
+                            selectBond(parseInt(firstOption.dataset.index));
+                        }
                     }
                     bondOptionsContainer.classList.add('hidden');
                 } else {
@@ -939,7 +971,7 @@ export default function App() {
         <div className="space-y-4">
             {/* Face Value */}
             <div>
-                <label htmlFor="faceValue" className="block text-sm font-semibold text-gray-700">Face Value (₦)</label>
+                <label id="faceValueLabel" htmlFor="faceValue" className="block text-sm font-semibold text-gray-700">Face Value ({currencySymbol})</label>
                 <input type="text" id="faceValue" placeholder="e.g. 1b, or 1e9 or 1,000,000,000" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
             </div>
 
@@ -1045,25 +1077,25 @@ export default function App() {
 
             {/* 1. BOND CLEAN PRICE CALCULATED */}
             <div>
-                <label htmlFor="calculatedBondPriceInput" className="block text-sm font-semibold text-gray-700">Clean Price Computed (6 d.p. ₦)</label>
+                <label id="cleanPriceLabel" htmlFor="calculatedBondPriceInput" className="block text-sm font-semibold text-gray-700">Clean Price Computed (6 d.p. {currencySymbol})</label>
                 <input type="text" id="calculatedBondPriceInput" defaultValue="0.000000" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 font-medium focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
             </div>
 
             {/* 3. CONSIDERATION CALCULATED */}
             <div>
-                <label htmlFor="considerationCalculatedInput" className="block text-sm font-semibold text-gray-700">Consideration (Total ₦)</label>
+                <label id="considerationLabel" htmlFor="considerationCalculatedInput" className="block text-sm font-semibold text-gray-700">Consideration (Total {currencySymbol})</label>
                 <input type="text" id="considerationCalculatedInput" defaultValue="0.00" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
             </div>
 
             {/* 4. FULL CLEAN PRICE */}
             <div>
-                <label htmlFor="fullCleanPriceInput" className="block text-sm font-semibold text-gray-700">Full Clean Price (15 d.p. ₦)</label>
+                <label id="fullCleanPriceLabel" htmlFor="fullCleanPriceInput" className="block text-sm font-semibold text-gray-700">Full Clean Price (15 d.p. {currencySymbol})</label>
                 <input type="text" id="fullCleanPriceInput" defaultValue="0.000000000000000" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm font-mono text-sm" readOnly />
             </div>
 
             {/* 2. BOND DIRTY PRICE CALCULATED */}
             <div>
-                <label htmlFor="bondDirtyPriceInput" className="block text-sm font-semibold text-gray-700">Dirty Price Computed (₦)</label>
+                <label id="dirtyPriceLabel" htmlFor="bondDirtyPriceInput" className="block text-sm font-semibold text-gray-700">Dirty Price Computed ({currencySymbol})</label>
                 <input type="text" id="bondDirtyPriceInput" defaultValue="0.00" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" readOnly />
             </div>
 
