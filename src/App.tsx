@@ -1966,14 +1966,7 @@ export default function App() {
                             <span>T+2</span>
                             <span className="text-[10px] font-normal opacity-90">({quickDates.t2.label})</span>
                         </button>
-                        <button
-                            type="button"
-                            onClick={() => handleDateSelection(new Date(2026, 10, 3))}
-                            title="Settlement benchmark for Kenyan 2041 IFB and verification against Excel model"
-                            className="px-2 py-1 rounded border border-emerald-300/80 bg-emerald-50/70 text-emerald-800 hover:bg-emerald-100 transition cursor-pointer text-[10px] font-semibold ml-auto"
-                        >
-                            3 Nov 2026 (Benchmark)
-                        </button>
+
                     </div>
 
                     {(quickDates.t1.skippedDetails.length > 0 || quickDates.t2.skippedDetails.length > 0) && (
