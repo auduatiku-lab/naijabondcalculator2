@@ -1,6 +1,52 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { getMarketQuickDates, getHolidayInfo, isWeekend, MarketCountry } from './utils/holidays';
 
+export function CountryFlag({ 
+  country, 
+  className = "w-4 h-3 inline-block rounded-xs shadow-2xs border border-black/15 shrink-0 align-middle" 
+}: { 
+  country: MarketCountry | 'NG' | 'KE'; 
+  className?: string; 
+}) {
+  if (country === 'KE') {
+    return (
+      <svg className={className} viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg" aria-label="Kenya Flag" role="img">
+        <path fill="#000000" d="M0 0h640v120H0z"/>
+        <path fill="#ffffff" d="M0 120h640v20H0z"/>
+        <path fill="#bb0000" d="M0 140h640v200H0z"/>
+        <path fill="#ffffff" d="M0 340h640v20H0z"/>
+        <path fill="#006600" d="M0 360h640v120H0z"/>
+        <path d="M230 90 L410 390 M410 90 L230 390" stroke="#ffffff" strokeWidth="12" strokeLinecap="round"/>
+        <path d="M230 90 L410 390 M410 90 L230 390" stroke="#000000" strokeWidth="4" strokeLinecap="round"/>
+        <path d="M320 125 C370 160 385 210 385 240 C385 270 370 320 320 355 C270 320 255 270 255 240 C255 210 270 160 320 125 Z" fill="#bb0000" stroke="#000000" strokeWidth="6"/>
+        <path d="M320 125 C300 160 290 200 290 240 C290 280 300 320 320 355 C300 320 290 280 290 240 C290 200 300 160 320 125 Z" fill="#000000"/>
+        <path d="M320 125 C340 160 350 200 350 240 C350 280 340 320 320 355 C340 320 350 280 350 240 C350 200 340 160 320 125 Z" fill="#000000"/>
+        <path d="M320 125 L320 355" stroke="#ffffff" strokeWidth="8"/>
+        <circle cx="320" cy="240" r="14" fill="#ffffff"/>
+      </svg>
+    );
+  }
+
+  // Default: Nigeria
+  return (
+    <svg className={className} viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg" aria-label="Nigeria Flag" role="img">
+      <path fill="#008751" d="M0 0h213.3v480H0z"/>
+      <path fill="#ffffff" d="M213.3 0h213.4v480H213.3z"/>
+      <path fill="#008751" d="M426.7 0H640v480H426.7z"/>
+    </svg>
+  );
+}
+
+export function getCountryFlagSvg(
+  country: 'NG' | 'KE', 
+  className = "w-4 h-3 inline-block rounded-xs shadow-2xs border border-black/15 shrink-0 align-middle"
+) {
+  if (country === 'KE') {
+    return `<svg class="${className}" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg" aria-label="Kenya Flag" role="img"><path fill="#000000" d="M0 0h640v120H0z"/><path fill="#ffffff" d="M0 120h640v20H0z"/><path fill="#bb0000" d="M0 140h640v200H0z"/><path fill="#ffffff" d="M0 340h640v20H0z"/><path fill="#006600" d="M0 360h640v120H0z"/><path d="M230 90 L410 390 M410 90 L230 390" stroke="#ffffff" stroke-width="12" stroke-linecap="round"/><path d="M230 90 L410 390 M410 90 L230 390" stroke="#000000" stroke-width="4" stroke-linecap="round"/><path d="M320 125 C370 160 385 210 385 240 C385 270 370 320 320 355 C270 320 255 270 255 240 C255 210 270 160 320 125 Z" fill="#bb0000" stroke="#000000" stroke-width="6"/><path d="M320 125 C300 160 290 200 290 240 C290 280 300 320 320 355 C300 320 290 280 290 240 C290 200 300 160 320 125 Z" fill="#000000"/><path d="M320 125 C340 160 350 200 350 240 C350 280 340 320 320 355 C340 320 350 280 350 240 C350 200 340 160 320 125 Z" fill="#000000"/><path d="M320 125 L320 355" stroke="#ffffff" stroke-width="8"/><circle cx="320" cy="240" r="14" fill="#ffffff"/></svg>`;
+  }
+  return `<svg class="${className}" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg" aria-label="Nigeria Flag" role="img"><path fill="#008751" d="M0 0h213.3v480H0z"/><path fill="#ffffff" d="M213.3 0h213.4v480H213.3z"/><path fill="#008751" d="M426.7 0H640v480H426.7z"/></svg>`;
+}
+
 export default function App() {
   const [currencySymbol, setCurrencySymbol] = useState('₦');
   const [activeMarket, setActiveMarket] = useState<MarketCountry>('NG');
@@ -1347,16 +1393,16 @@ export default function App() {
 
         if (ngBonds.length > 0) {
             const ngHeader = document.createElement('div');
-            ngHeader.className = 'px-3 py-1 bg-gray-100 text-[11px] font-bold text-gray-600 uppercase tracking-wider sticky top-0 border-b border-gray-200 select-none flex items-center justify-between z-10';
-            ngHeader.innerHTML = `<span>🇳🇬 Nigerian Sovereign Bonds (FGN / Sukuk)</span><span class="text-[10px] text-gray-500 font-normal">Actual/Actual</span>`;
+            ngHeader.className = 'px-3 py-1.5 bg-gray-100 text-[11px] font-bold text-gray-700 uppercase tracking-wider sticky top-0 border-b border-gray-200 select-none flex items-center justify-between z-10';
+            ngHeader.innerHTML = `<span class="flex items-center gap-1.5">${getCountryFlagSvg('NG', 'w-4 h-3')} <span>Nigerian Sovereign Bonds (FGN / Sukuk)</span></span><span class="text-[10px] text-gray-500 font-normal">Actual/Actual</span>`;
             bondOptionsContainer.appendChild(ngHeader);
             ngBonds.forEach(appendOption);
         }
 
         if (keBonds.length > 0) {
             const keHeader = document.createElement('div');
-            keHeader.className = 'px-3 py-1 bg-emerald-50 text-[11px] font-bold text-emerald-800 uppercase tracking-wider sticky top-0 border-t border-b border-emerald-200 select-none flex items-center justify-between z-10';
-            keHeader.innerHTML = `<span>🇰🇪 Kenyan Sovereign Bonds (FXD / IFB)</span><span class="text-[10px] text-emerald-700 font-normal">Actual/364</span>`;
+            keHeader.className = 'px-3 py-1.5 bg-emerald-50 text-[11px] font-bold text-emerald-800 uppercase tracking-wider sticky top-0 border-t border-b border-emerald-200 select-none flex items-center justify-between z-10';
+            keHeader.innerHTML = `<span class="flex items-center gap-1.5">${getCountryFlagSvg('KE', 'w-4 h-3')} <span>Kenyan Sovereign Bonds (FXD / IFB)</span></span><span class="text-[10px] text-emerald-700 font-normal">Actual/364</span>`;
             bondOptionsContainer.appendChild(keHeader);
             keBonds.forEach(appendOption);
         }
@@ -1768,7 +1814,6 @@ export default function App() {
                 <div className="rounded-lg border border-emerald-200 bg-emerald-50/70 p-3.5 space-y-2.5 transition-all duration-200">
                     <div className="flex items-center justify-between flex-wrap gap-2">
                         <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-emerald-950">
-                            <span>🇰🇪</span>
                             <span>CBK / NSE Kenyan Engine</span>
                         </div>
                         <div className="flex flex-wrap gap-1 text-[11px] font-semibold">
@@ -2000,12 +2045,12 @@ export default function App() {
                     <div className="flex flex-wrap items-center justify-between text-[11px] gap-1">
                         <div className="flex items-center gap-1.5 font-semibold text-gray-700">
                             <span>Quick Dates:</span>
-                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${
+                            <span className={`inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${
                                 activeMarket === 'KE'
                                     ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
                                     : 'bg-blue-50 text-blue-800 border-blue-300'
                             }`}>
-                                <span>{quickDates.flag}</span>
+                                <CountryFlag country={activeMarket} />
                                 <span>{activeMarket === 'KE' ? 'Kenya Banking Calendar (CBK / NSE)' : 'Nigeria Banking Calendar (FMDQ)'}</span>
                             </span>
                         </div>
@@ -2068,9 +2113,8 @@ export default function App() {
                 <div ref={calendarPopoverRef} id="calendar-popover" className="absolute z-50 p-4 bg-white border border-gray-200 rounded-lg shadow-2xl w-72 md:w-84 right-0 sm:right-4 top-16" style={{ display: isCalendarOpen ? 'block' : 'none' }}>
                     {/* Market Header */}
                     <div className="mb-2 pb-1.5 border-b border-gray-100 flex items-center justify-between text-[11px]">
-                        <span className="font-semibold text-gray-700 flex items-center gap-1">
-                            <span>{quickDates.flag}</span>
-                            <span>{activeMarket === 'KE' ? 'Kenya Market Calendar' : 'Nigeria Market Calendar'}</span>
+                        <span className="font-semibold text-gray-700">
+                            {activeMarket === 'KE' ? 'Kenya Market Calendar' : 'Nigeria Market Calendar'}
                         </span>
                         <span className="text-[10px] text-amber-700 bg-amber-50 px-1 py-0.5 rounded border border-amber-200 font-medium">
                             Amber = Holiday
@@ -2198,13 +2242,6 @@ export default function App() {
                             }`}
                         >
                             T+2 ({quickDates.t2.label})
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => handleDateSelection(new Date(2026, 10, 3))}
-                            className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 font-semibold cursor-pointer text-[10px] ml-auto"
-                        >
-                            3 Nov 2026
                         </button>
                     </div>
                 </div>
