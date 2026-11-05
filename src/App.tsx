@@ -288,6 +288,22 @@ export default function App() {
             whtRate: 0.10 
         },
         { 
+            name: "17.9327% KENYAN INFRASTRUCTURE BOND MAY 2030", 
+            couponRate: 17.9327, 
+            maturityDate: "06-MAY-2030", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2023/6.5 06 MAY 2030 6.5YR KENYAN MAY 2030 BOND MAY 30S MAY 30 IFB IFB1/2023/006.5 KENYAN INFRASTRUCTURE BOND MAY 2030", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "IFB", 
+            originalTenorYears: 6.5, 
+            whtRate: 0.0,
+            amortizationEvents: [
+                { date: "10-MAY-2027", percent: 50 },
+                { date: "07-MAY-2029", percent: 15 },
+                { date: "06-MAY-2030", percent: 35 }
+            ]
+        },
+        { 
             name: "12.5000% KENYAN INFRASTRUCTURE BOND JAN 2033", 
             couponRate: 12.50, 
             maturityDate: "10-JAN-2033", 
@@ -809,7 +825,7 @@ export default function App() {
             if (bond.amortizationEvents && bond.amortizationEvents.length > 0) {
                 const event = bond.amortizationEvents.find((ev: any) => {
                     const evDate = parseMaturityDate(ev.date);
-                    return Math.abs(evDate.getTime() - tempDate.getTime()) <= 3 * MS_PER_DAY;
+                    return Math.abs(evDate.getTime() - tempDate.getTime()) <= 5 * MS_PER_DAY;
                 });
                 if (event) {
                     principalRepaid = event.percent;
