@@ -2271,8 +2271,20 @@ export default function App() {
 
             {/* 3. CONSIDERATION CALCULATED */}
             <div>
-                <label id="considerationLabel" htmlFor="considerationCalculatedInput" className="block text-sm font-semibold text-gray-700">Consideration (Total {currencySymbol})</label>
-                <input type="text" id="considerationCalculatedInput" defaultValue="0.00" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
+                <div className="flex items-center justify-between">
+                    <label id="considerationLabel" htmlFor="considerationCalculatedInput" className="block text-sm font-semibold text-gray-800">
+                        Consideration (Total {currencySymbol})
+                    </label>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200/80 shadow-2xs">
+                        Settlement Amount
+                    </span>
+                </div>
+                <input 
+                    type="text" 
+                    id="considerationCalculatedInput" 
+                    defaultValue="0.00" 
+                    className="mt-1 block w-full px-3 py-2 bg-slate-50/80 border border-slate-300 rounded-md text-gray-900 font-bold text-[15px] sm:text-base focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 shadow-xs" 
+                />
             </div>
 
             {/* 4. FULL CLEAN PRICE */}
