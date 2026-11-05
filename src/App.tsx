@@ -319,6 +319,7 @@ export default function App() {
     // Custom Dropdown Elements
     const bondSearchInput = document.getElementById('bondSearchInput') as HTMLInputElement;
     const bondOptionsContainer = document.getElementById('bondOptionsContainer') as HTMLDivElement;
+    const clearBondBtn = document.getElementById('clearBondBtn') as HTMLButtonElement | null;
 
     const bondCleanPriceInput = document.getElementById('calculatedBondPriceInput') as HTMLInputElement; 
     const bondDirtyPriceInput = document.getElementById('bondDirtyPriceInput') as HTMLInputElement; 
@@ -1363,6 +1364,42 @@ export default function App() {
         activeOptionIndex = -1;
     }
 
+    let measureCanvas: HTMLCanvasElement | null = null;
+    function positionClearButton() {
+        if (!clearBondBtn || !bondSearchInput) return;
+        const value = bondSearchInput.value;
+        if (!value || value.trim() === '') {
+            clearBondBtn.classList.add('hidden');
+            return;
+        }
+
+        clearBondBtn.classList.remove('hidden');
+
+        const style = window.getComputedStyle(bondSearchInput);
+        const font = `${style.fontWeight || '400'} ${style.fontSize || '16px'} ${style.fontFamily || 'sans-serif'}`;
+        
+        if (!measureCanvas) {
+            measureCanvas = document.createElement('canvas');
+        }
+        const context = measureCanvas.getContext('2d');
+        let textWidth = 0;
+        if (context) {
+            context.font = font;
+            textWidth = context.measureText(value).width;
+        }
+
+        const paddingLeft = parseFloat(style.paddingLeft) || 12;
+        // User specification: Exactly 10 pixels distance between the last character and the red "✕" button for all bonds
+        const exactLeft = paddingLeft + textWidth + 10;
+        
+        // Safety cap so the button never overflows past the input's right border
+        const maxLeft = bondSearchInput.offsetWidth - 28;
+        const finalLeft = Math.min(exactLeft, maxLeft);
+
+        clearBondBtn.style.left = `${finalLeft}px`;
+        clearBondBtn.style.right = 'auto';
+    }
+
     function selectBond(index: number) {
         selectedBondIndex = index;
         bondOptionsContainer.classList.add('hidden');
@@ -1373,6 +1410,7 @@ export default function App() {
         }
         backspaceCount = 0;
         updateBondDetails();
+        positionClearButton();
     }
 
     function updateActiveOption(direction: number) {
@@ -1422,6 +1460,9 @@ export default function App() {
             couponRateInput.placeholder = 'To be Determined';
             maturityDateInput.placeholder = 'To be Determined';
             setYearsToMaturityPendingState('Awaiting Maturity Date');
+            couponRateInput.readOnly = false;
+            maturityDateInput.readOnly = false;
+            if (clearBondBtn) clearBondBtn.classList.add('hidden');
         } else {
             const bond = bonds[selectedBondIndex];
             const isKenyan = isKenyanBond(bond);
@@ -1441,12 +1482,34 @@ export default function App() {
 
             couponRateInput.readOnly = true;
             maturityDateInput.readOnly = true;
+            positionClearButton();
         }
         calculateBondPrice();
     }
 
+    function handleClearBond(e?: Event) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        selectBond(-1);
+        yearsToMaturityInput.value = 'Select a Bond';
+        positionClearButton();
+        filterBonds('');
+        bondOptionsContainer.classList.remove('hidden');
+        bondSearchInput.focus();
+    }
+
     // --- Event Listeners ---
-    bondSearchInput.addEventListener('input', () => filterBonds(bondSearchInput.value));
+    clearBondBtn?.addEventListener('click', handleClearBond);
+    bondSearchInput.addEventListener('input', () => {
+        positionClearButton();
+        filterBonds(bondSearchInput.value);
+    });
+    window.addEventListener('resize', positionClearButton);
+    if ('fonts' in document) {
+        (document as any).fonts.ready.then(() => positionClearButton());
+    }
     bondSearchInput.addEventListener('focus', () => {
         backspaceCount = 0;
         filterBonds('');
@@ -1650,6 +1713,8 @@ export default function App() {
         document.removeEventListener('calculateBond', calculateBondPrice);
         calendarToggle?.removeEventListener('click', toggleCalendar);
         settlementDateInput?.removeEventListener('click', toggleCalendar);
+        clearBondBtn?.removeEventListener('click', handleClearBond);
+        window.removeEventListener('resize', positionClearButton);
     };
 
   }, []);
@@ -1671,7 +1736,27 @@ export default function App() {
             <div>
                 <label htmlFor="bondSearchInput" className="block text-sm font-semibold text-gray-700">Select Bond</label>
                 <div className="relative" id="customBondSelect">
-                    <input type="text" id="bondSearchInput" placeholder="Select or Type Bond" className="text-sm sm:text-base mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
+                    <input 
+                        type="text" 
+                        id="bondSearchInput" 
+                        placeholder="Select or Type Bond" 
+                        className="text-sm sm:text-base mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" 
+                    />
+                    {/* Subtle, almost unnoticeable clickable 'x' positioned exactly 10px after the last character */}
+                    <button
+                        type="button"
+                        id="clearBondBtn"
+                        aria-label="Clear selected bond"
+                        title="Clear selected bond"
+                        className="absolute top-1/2 -translate-y-1/2 mt-0.5 flex items-center justify-center cursor-pointer transition-opacity duration-150 hidden group z-10"
+                    >
+                        <span className="flex items-center justify-center w-4 h-4 rounded-full text-red-300/70 hover:text-red-500 hover:bg-red-50/60 transition-all opacity-65 hover:opacity-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </span>
+                    </button>
                     <div id="bondOptionsContainer" className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-y-auto">
                         {/* Bond options will be dynamically inserted here */}
                     </div>
