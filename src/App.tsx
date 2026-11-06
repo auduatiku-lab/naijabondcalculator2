@@ -319,6 +319,21 @@ export default function App() {
             ]
         },
         { 
+            name: "13.9380% KENYAN INFRASTRUCTURE BOND OCT 2036", 
+            couponRate: 13.938, 
+            maturityDate: "27-OCT-2036", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2022/14 27 OCT 2036 14YR KENYAN OCT 2036 BOND OCT 36S OCT 36 IFB IFB1/2022/014 KENYAN INFRASTRUCTURE BOND OCT 2036", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "IFB", 
+            originalTenorYears: 14, 
+            whtRate: 0.0,
+            amortizationEvents: [
+                { date: "04-NOV-2030", percent: 50 },
+                { date: "27-OCT-2036", percent: 50 }
+            ]
+        },
+        { 
             name: "12.9650% KENYAN INFRASTRUCTURE BOND JAN 2041", 
             couponRate: 12.965, 
             maturityDate: "28-JAN-2041", 
