@@ -47,13 +47,120 @@ export function getCountryFlagSvg(
   return `<svg class="${className}" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg" aria-label="Nigeria Flag" role="img"><path fill="#008751" d="M0 0h213.3v480H0z"/><path fill="#ffffff" d="M213.3 0h213.4v480H213.3z"/><path fill="#008751" d="M426.7 0H640v480H426.7z"/></svg>`;
 }
 
+export function detectUserMarket(): MarketCountry {
+  try {
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('detected_user_market');
+      if (stored === 'KE' || stored === 'NG') {
+        return stored;
+      }
+    }
+
+    // 1. Timezone-based detection
+    // Only match timezone names that specifically belong to Kenya or Nigeria.
+    // If the user is in an unlisted country, default to Nigeria ('NG') as standard.
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    const tzLower = timeZone.toLowerCase();
+    if (tzLower.includes('nairobi') || tzLower.includes('kenya')) {
+      return 'KE';
+    }
+    if (tzLower.includes('lagos') || tzLower.includes('nigeria')) {
+      return 'NG';
+    }
+
+    // 2. Browser locale detection (e.g. en-KE, sw-KE, en-NG, etc.)
+    const languages = typeof navigator !== 'undefined' ? (navigator.languages || [navigator.language || '']) : [];
+    for (const lang of languages) {
+      const upper = (lang || '').toUpperCase();
+      if (upper.includes('-KE') || upper === 'KE') {
+        return 'KE';
+      }
+      if (upper.includes('-NG') || upper === 'NG') {
+        return 'NG';
+      }
+    }
+  } catch (e) {
+    // Fallback if APIs are restricted
+  }
+
+  // Standard platform default for any country whose bonds are not listed on the platform: Nigeria (NG)
+  return 'NG';
+}
+
 export default function App() {
-  const [currencySymbol, setCurrencySymbol] = useState('₦');
-  const [activeMarket, setActiveMarket] = useState<MarketCountry>('NG');
-  const activeMarketRef = useRef<MarketCountry>('NG');
+  const initialDetectedMarket = useMemo(() => detectUserMarket(), []);
+  const [currencySymbol, setCurrencySymbol] = useState(initialDetectedMarket === 'KE' ? 'KShs' : '₦');
+  const [activeMarket, setActiveMarket] = useState<MarketCountry>(initialDetectedMarket);
+  const defaultUserMarketRef = useRef<MarketCountry>(initialDetectedMarket);
+  const activeMarketRef = useRef<MarketCountry>(initialDetectedMarket);
+  const selectedBondIndexRef = useRef<number>(-1);
+
   useEffect(() => {
     activeMarketRef.current = activeMarket;
   }, [activeMarket]);
+
+  useEffect(() => {
+    // Asynchronous non-blocking IP country detection to confirm country
+    let isMounted = true;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+    const handleResolvedCountryCode = (countryCode: string) => {
+      // If user is in Kenya, initialize with Kenyan market.
+      // If user is in Nigeria or any country whose bonds are not listed (e.g. US, UK, ZA, GH, etc.),
+      // default to the Nigerian initial display as the standard platform default.
+      const resolvedMarket: MarketCountry = countryCode.toUpperCase() === 'KE' ? 'KE' : 'NG';
+      
+      defaultUserMarketRef.current = resolvedMarket;
+      try {
+        sessionStorage.setItem('detected_user_market', resolvedMarket);
+      } catch (e) {}
+
+      if (isMounted && selectedBondIndexRef.current === -1) {
+        setActiveMarket(resolvedMarket);
+        const symbol = resolvedMarket === 'KE' ? 'KShs' : '₦';
+        setCurrencySymbol(symbol);
+        const faceValueLabel = document.getElementById('faceValueLabel');
+        if (faceValueLabel) faceValueLabel.textContent = `Face Value (${symbol})`;
+        const cleanPriceLabel = document.getElementById('cleanPriceLabel');
+        if (cleanPriceLabel) cleanPriceLabel.textContent = `Clean Price Computed (6 d.p. ${symbol})`;
+        const considerationLabel = document.getElementById('considerationLabel');
+        if (considerationLabel) considerationLabel.textContent = `Consideration (Total ${symbol})`;
+        const fullCleanPriceLabel = document.getElementById('fullCleanPriceLabel');
+        if (fullCleanPriceLabel) fullCleanPriceLabel.textContent = `Full Clean Price (15 d.p. ${symbol})`;
+        const dirtyPriceLabel = document.getElementById('dirtyPriceLabel');
+        if (dirtyPriceLabel) dirtyPriceLabel.textContent = `Dirty Price Computed (${symbol})`;
+      }
+    };
+
+    fetch('https://ipapi.co/json/', { signal: controller.signal })
+      .then(res => res.json())
+      .then(data => {
+        clearTimeout(timeoutId);
+        const code = (data?.country_code || '').toUpperCase();
+        if (code) {
+          handleResolvedCountryCode(code);
+        }
+      })
+      .catch(() => {
+        // Fallback to secondary geo endpoint
+        fetch('https://api.country.is', { signal: AbortSignal.timeout(1500) })
+          .then(res => res.json())
+          .then(data => {
+            const code = (data?.country || '').toUpperCase();
+            if (code) {
+              handleResolvedCountryCode(code);
+            }
+          })
+          .catch(() => {});
+      });
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedSettlementDate, setSelectedSettlementDate] = useState(() => {
@@ -304,6 +411,22 @@ export default function App() {
             ]
         },
         { 
+            name: "15.8370% KENYAN INFRASTRUCTURE BOND JUN 2030", 
+            couponRate: 15.837, 
+            maturityDate: "10-JUN-2030", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2023/7 10 JUN 2030 7YR KENYAN JUN 2030 BOND JUN 30S JUN 30 IFB IFB1/2023/007 KENYAN INFRASTRUCTURE BOND JUN 2030 KENYAN IFB JUN 2030 IFB JUN 2030 JUNE 2030", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "IFB", 
+            originalTenorYears: 7, 
+            whtRate: 0.0,
+            amortizationEvents: [
+                { date: "15-JUN-2026", percent: 20 },
+                { date: "13-DEC-2027", percent: 24 },
+                { date: "10-JUN-2030", percent: 56 }
+            ]
+        },
+        { 
             name: "12.5000% KENYAN INFRASTRUCTURE BOND JAN 2033", 
             couponRate: 12.50, 
             maturityDate: "10-JAN-2033", 
@@ -376,10 +499,12 @@ export default function App() {
         }
     ];
 
-    const bonds: BondItem[] = [
-        ...nigerianBonds,
-        ...kenyanBonds
-    ].filter(bond => parseMaturityDate(bond.maturityDate).getTime() >= today.getTime());
+    const userMarket = defaultUserMarketRef.current;
+    const bonds: BondItem[] = (
+        userMarket === 'KE'
+            ? [...kenyanBonds, ...nigerianBonds]
+            : [...nigerianBonds, ...kenyanBonds]
+    ).filter(bond => parseMaturityDate(bond.maturityDate).getTime() >= today.getTime());
     
     let isUpdating = false; // Flag to prevent calculation loops
     let selectedBondIndex = -1; // State for custom dropdown
@@ -811,8 +936,8 @@ export default function App() {
         const currentParFactor = currentParPercent / 100;
 
         // Accrued interest per 100 nominal:
-        // Formula: (Coupon / 2) * (Actual Days Held / 182) * currentParFactor
-        const AI_per_100_raw = (C / 2) * (A / KENYA_COUPON_PERIOD_DAYS) * 100 * currentParFactor;
+        // Standard CBK & market quote convention: (Coupon / 2) * (Actual Days Held / 182) * 100
+        const AI_per_100_raw = (C / 2) * (A / KENYA_COUPON_PERIOD_DAYS) * 100;
         const AI_per_100 = Math.round(AI_per_100_raw * 1e6) / 1e6;
 
         // Generate future cash flows from NCC up to maturity in exact 182-day increments
@@ -1197,17 +1322,7 @@ export default function App() {
         if (isKenyan && selectedBond) {
             const { A } = findKenyanCouponDates(settlementDate, maturity);
             const C = selectedBond.couponRate / 100;
-            let currentParPercent = 100;
-            if (selectedBond.amortizationEvents && selectedBond.amortizationEvents.length > 0) {
-                for (const ev of selectedBond.amortizationEvents) {
-                    const evDate = parseMaturityDate(ev.date);
-                    if (settlementDate.getTime() >= evDate.getTime()) {
-                        currentParPercent -= ev.percent;
-                    }
-                }
-            }
-            const parFactor = Math.max(0, currentParPercent) / 100;
-            const AI = (C / 2) * (A / KENYA_COUPON_PERIOD_DAYS) * 100 * parFactor;
+            const AI = (C / 2) * (A / KENYA_COUPON_PERIOD_DAYS) * 100;
             const derivedClean = dirtyPrice - AI;
             const calculatedYield = calculateKenyanYieldFromPrice(derivedClean, settlementDate, maturity, selectedBond);
             yieldToMaturityInput.value = (calculatedYield * 100).toFixed(4);
@@ -1254,17 +1369,7 @@ export default function App() {
         if (isKenyan && selectedBond) {
             const { A } = findKenyanCouponDates(settlementDate, maturity);
             const C = selectedBond.couponRate / 100;
-            let currentParPercent = 100;
-            if (selectedBond.amortizationEvents && selectedBond.amortizationEvents.length > 0) {
-                for (const ev of selectedBond.amortizationEvents) {
-                    const evDate = parseMaturityDate(ev.date);
-                    if (settlementDate.getTime() >= evDate.getTime()) {
-                        currentParPercent -= ev.percent;
-                    }
-                }
-            }
-            const parFactor = Math.max(0, currentParPercent) / 100;
-            const AI = (C / 2) * (A / KENYA_COUPON_PERIOD_DAYS) * 100 * parFactor;
+            const AI = (C / 2) * (A / KENYA_COUPON_PERIOD_DAYS) * 100;
             const targetCleanPrice = targetDirtyPrice - AI;
 
             const calculatedYield = calculateKenyanYieldFromPrice(targetCleanPrice, settlementDate, maturity, selectedBond);
@@ -1422,20 +1527,34 @@ export default function App() {
             bondOptionsContainer.appendChild(option);
         };
 
-        if (ngBonds.length > 0) {
-            const ngHeader = document.createElement('div');
-            ngHeader.className = 'px-3 py-1.5 bg-gray-100 text-[11px] font-bold text-gray-700 uppercase tracking-wider sticky top-0 border-b border-gray-200 select-none flex items-center justify-between z-10';
-            ngHeader.innerHTML = `<span class="flex items-center gap-1.5">${getCountryFlagSvg('NG', 'w-4 h-3')} <span>Nigerian Sovereign Bonds (FGN / Sukuk)</span></span><span class="text-[10px] text-gray-500 font-normal">Actual/Actual</span>`;
-            bondOptionsContainer.appendChild(ngHeader);
-            ngBonds.forEach(appendOption);
-        }
+        const preferKenya = defaultUserMarketRef.current === 'KE' || activeMarketRef.current === 'KE';
 
-        if (keBonds.length > 0) {
-            const keHeader = document.createElement('div');
-            keHeader.className = 'px-3 py-1.5 bg-emerald-50 text-[11px] font-bold text-emerald-800 uppercase tracking-wider sticky top-0 border-t border-b border-emerald-200 select-none flex items-center justify-between z-10';
-            keHeader.innerHTML = `<span class="flex items-center gap-1.5">${getCountryFlagSvg('KE', 'w-4 h-3')} <span>Kenyan Sovereign Bonds (FXD / IFB)</span></span><span class="text-[10px] text-emerald-700 font-normal">Actual/364</span>`;
-            bondOptionsContainer.appendChild(keHeader);
-            keBonds.forEach(appendOption);
+        const renderNigerianSection = (isFirst: boolean) => {
+            if (ngBonds.length > 0) {
+                const ngHeader = document.createElement('div');
+                ngHeader.className = `px-3 py-1.5 bg-gray-100 text-[11px] font-bold text-gray-700 uppercase tracking-wider sticky top-0 ${isFirst ? 'border-b' : 'border-t border-b'} border-gray-200 select-none flex items-center justify-between z-10`;
+                ngHeader.innerHTML = `<span class="flex items-center gap-1.5">${getCountryFlagSvg('NG', 'w-4 h-3')} <span>Nigerian Sovereign Bonds (FGN / Sukuk)</span></span><span class="text-[10px] text-gray-500 font-normal">Actual/Actual</span>`;
+                bondOptionsContainer.appendChild(ngHeader);
+                ngBonds.forEach(appendOption);
+            }
+        };
+
+        const renderKenyanSection = (isFirst: boolean) => {
+            if (keBonds.length > 0) {
+                const keHeader = document.createElement('div');
+                keHeader.className = `px-3 py-1.5 bg-emerald-50 text-[11px] font-bold text-emerald-800 uppercase tracking-wider sticky top-0 ${isFirst ? 'border-b' : 'border-t border-b'} border-emerald-200 select-none flex items-center justify-between z-10`;
+                keHeader.innerHTML = `<span class="flex items-center gap-1.5">${getCountryFlagSvg('KE', 'w-4 h-3')} <span>Kenyan Sovereign Bonds (FXD / IFB)</span></span><span class="text-[10px] text-emerald-700 font-normal">Actual/364</span>`;
+                bondOptionsContainer.appendChild(keHeader);
+                keBonds.forEach(appendOption);
+            }
+        };
+
+        if (preferKenya) {
+            renderKenyanSection(true);
+            renderNigerianSection(false);
+        } else {
+            renderNigerianSection(true);
+            renderKenyanSection(false);
         }
 
         activeOptionIndex = -1;
@@ -1479,6 +1598,7 @@ export default function App() {
 
     function selectBond(index: number) {
         selectedBondIndex = index;
+        selectedBondIndexRef.current = index;
         bondOptionsContainer.classList.add('hidden');
         if (index > -1) {
             bondSearchInput.value = bonds[index].name;
@@ -1530,8 +1650,9 @@ export default function App() {
     function updateBondDetails() {
         if (selectedBondIndex === -1) {
             setKenyanAnalytics(null);
-            setActiveMarket('NG');
-            updateCurrencyDisplay('₦');
+            const defaultMarket = defaultUserMarketRef.current;
+            setActiveMarket(defaultMarket);
+            updateCurrencyDisplay(defaultMarket === 'KE' ? 'KShs' : '₦');
             couponRateInput.value = '';
             maturityDateInput.value = ''; 
             couponRateInput.placeholder = 'To be Determined';
