@@ -384,6 +384,21 @@ export default function App() {
 
     const kenyanBonds: BondItem[] = [
         { 
+            name: "13.2150% KENYAN INFRASTRUCTURE BOND NOV 2028", 
+            couponRate: 13.215, 
+            maturityDate: "27-NOV-2028", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2022/6 27 NOV 2028 6YR KENYAN NOV 2028 BOND NOV 28S NOV 28 IFB IFB1/2022/006 KENYAN INFRASTRUCTURE BOND NOV 2028 KENYAN IFB NOV 2028 IFB NOV 2028 NOVEMBER 2028 13.215%", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "IFB", 
+            originalTenorYears: 6, 
+            whtRate: 0.0,
+            amortizationEvents: [
+                { date: "01-DEC-2025", percent: 50 },
+                { date: "27-NOV-2028", percent: 50 }
+            ]
+        },
+        { 
             name: "12.2800% KENYAN BOND NOV 2029", 
             couponRate: 12.28, 
             maturityDate: "12-NOV-2029", 
