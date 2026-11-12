@@ -442,6 +442,21 @@ export default function App() {
             ]
         },
         { 
+            name: "10.9000% KENYAN INFRASTRUCTURE BOND AUG 2031", 
+            couponRate: 10.90, 
+            maturityDate: "11-AUG-2031", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2020/011 IFB1/2020/11 11 AUG 2031 11YR KENYAN AUG 2031 BOND AUG 31S AUG 31 IFB KENYAN INFRASTRUCTURE BOND AUG 2031 KENYAN IFB AUG 2031 IFB AUG 2031 IFB AUGUST 2031 AUGUST 2031 10.9% 10.900% KENYAN INFRASTRUTURE BOND AUG 2031", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "IFB", 
+            originalTenorYears: 11, 
+            whtRate: 0.0,
+            amortizationEvents: [
+                { date: "17-AUG-2026", percent: 50 },
+                { date: "11-AUG-2031", percent: 50 }
+            ]
+        },
+        { 
             name: "12.5000% KENYAN INFRASTRUCTURE BOND JAN 2033", 
             couponRate: 12.50, 
             maturityDate: "10-JAN-2033", 
