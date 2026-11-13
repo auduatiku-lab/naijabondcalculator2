@@ -123,13 +123,13 @@ export default function App() {
         const faceValueLabel = document.getElementById('faceValueLabel');
         if (faceValueLabel) faceValueLabel.textContent = `Face Value (${symbol})`;
         const cleanPriceLabel = document.getElementById('cleanPriceLabel');
-        if (cleanPriceLabel) cleanPriceLabel.textContent = `Clean Price Computed (6 d.p. ${symbol})`;
+        if (cleanPriceLabel) cleanPriceLabel.textContent = resolvedMarket === 'KE' ? 'Clean Price Computed' : `Clean Price Computed (6 d.p. ${symbol})`;
         const considerationLabel = document.getElementById('considerationLabel');
         if (considerationLabel) considerationLabel.textContent = `Consideration (Total ${symbol})`;
         const fullCleanPriceLabel = document.getElementById('fullCleanPriceLabel');
         if (fullCleanPriceLabel) fullCleanPriceLabel.textContent = `Full Clean Price (15 d.p. ${symbol})`;
         const dirtyPriceLabel = document.getElementById('dirtyPriceLabel');
-        if (dirtyPriceLabel) dirtyPriceLabel.textContent = `Dirty Price Computed (${symbol})`;
+        if (dirtyPriceLabel) dirtyPriceLabel.textContent = resolvedMarket === 'KE' ? `Dirty Price Computed (4 d.p. ${symbol})` : `Dirty Price Computed (${symbol})`;
       }
     };
 
@@ -384,10 +384,10 @@ export default function App() {
 
     const kenyanBonds: BondItem[] = [
         { 
-            name: "13.2150% KENYAN INFRASTRUCTURE BOND NOV 2028", 
+            name: "13.2150% KENYAN IFB NOV 2028", 
             couponRate: 13.215, 
             maturityDate: "27-NOV-2028", 
-            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2022/6 27 NOV 2028 6YR KENYAN NOV 2028 BOND NOV 28S NOV 28 IFB IFB1/2022/006 KENYAN INFRASTRUCTURE BOND NOV 2028 KENYAN IFB NOV 2028 IFB NOV 2028 NOVEMBER 2028 13.215%", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2022/6 27 NOV 2028 6YR KENYAN NOV 2028 BOND NOV 28S NOV 28 IFB IFB1/2022/006 KENYAN IFB NOV 2028 KENYAN IFB NOV 2028 IFB NOV 2028 NOVEMBER 2028 13.215%", 
             currency: "KShs", 
             country: "KE", 
             bondType: "IFB", 
@@ -396,6 +396,21 @@ export default function App() {
             amortizationEvents: [
                 { date: "01-DEC-2025", percent: 50 },
                 { date: "27-NOV-2028", percent: 50 }
+            ]
+        },
+        { 
+            name: "10.8500% KENYAN IFB APR 2029", 
+            couponRate: 10.85, 
+            maturityDate: "02-APR-2029", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2020/009 IFB1/2020/9 02 APR 2029 9YR KENYAN APR 2029 BOND APR 29S APR 29 IFB KENYAN IFB APR 2029 KENYAN IFB APR 2029 IFB APR 2029 IFB APRIL 2029 APRIL 2029 10.85% 10.850% KENYAN INFRASTRUTURE BOND APR 2029", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "IFB", 
+            originalTenorYears: 9, 
+            whtRate: 0.0,
+            amortizationEvents: [
+                { date: "07-APR-2025", percent: 50 },
+                { date: "02-APR-2029", percent: 50 }
             ]
         },
         { 
@@ -410,10 +425,10 @@ export default function App() {
             whtRate: 0.10 
         },
         { 
-            name: "17.9327% KENYAN INFRASTRUCTURE BOND MAY 2030", 
+            name: "17.9327% KENYAN IFB MAY 2030", 
             couponRate: 17.9327, 
             maturityDate: "06-MAY-2030", 
-            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2023/6.5 06 MAY 2030 6.5YR KENYAN MAY 2030 BOND MAY 30S MAY 30 IFB IFB1/2023/006.5 KENYAN INFRASTRUCTURE BOND MAY 2030", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2023/6.5 06 MAY 2030 6.5YR KENYAN MAY 2030 BOND MAY 30S MAY 30 IFB IFB1/2023/006.5 KENYAN IFB MAY 2030", 
             currency: "KShs", 
             country: "KE", 
             bondType: "IFB", 
@@ -426,10 +441,10 @@ export default function App() {
             ]
         },
         { 
-            name: "15.8370% KENYAN INFRASTRUCTURE BOND JUN 2030", 
+            name: "15.8370% KENYAN IFB JUN 2030", 
             couponRate: 15.837, 
             maturityDate: "10-JUN-2030", 
-            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2023/7 10 JUN 2030 7YR KENYAN JUN 2030 BOND JUN 30S JUN 30 IFB IFB1/2023/007 KENYAN INFRASTRUCTURE BOND JUN 2030 KENYAN IFB JUN 2030 IFB JUN 2030 JUNE 2030", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2023/7 10 JUN 2030 7YR KENYAN JUN 2030 BOND JUN 30S JUN 30 IFB IFB1/2023/007 KENYAN IFB JUN 2030 KENYAN IFB JUN 2030 IFB JUN 2030 JUNE 2030", 
             currency: "KShs", 
             country: "KE", 
             bondType: "IFB", 
@@ -442,10 +457,10 @@ export default function App() {
             ]
         },
         { 
-            name: "10.9000% KENYAN INFRASTRUCTURE BOND AUG 2031", 
+            name: "10.9000% KENYAN IFB AUG 2031", 
             couponRate: 10.90, 
             maturityDate: "11-AUG-2031", 
-            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2020/011 IFB1/2020/11 11 AUG 2031 11YR KENYAN AUG 2031 BOND AUG 31S AUG 31 IFB KENYAN INFRASTRUCTURE BOND AUG 2031 KENYAN IFB AUG 2031 IFB AUG 2031 IFB AUGUST 2031 AUGUST 2031 10.9% 10.900% KENYAN INFRASTRUTURE BOND AUG 2031", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2020/011 IFB1/2020/11 11 AUG 2031 11YR KENYAN AUG 2031 BOND AUG 31S AUG 31 IFB KENYAN IFB AUG 2031 KENYAN IFB AUG 2031 IFB AUG 2031 IFB AUGUST 2031 AUGUST 2031 10.9% 10.900% KENYAN INFRASTRUTURE BOND AUG 2031", 
             currency: "KShs", 
             country: "KE", 
             bondType: "IFB", 
@@ -457,10 +472,10 @@ export default function App() {
             ]
         },
         { 
-            name: "12.5000% KENYAN INFRASTRUCTURE BOND JAN 2033", 
+            name: "12.5000% KENYAN IFB JAN 2033", 
             couponRate: 12.50, 
             maturityDate: "10-JAN-2033", 
-            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2018/015 10 JAN 2033 KENYAN JAN 2033 BOND IFB", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2018/015 IFB1/2018/15 IFB 1/2018/15 KE5000008093 10 JAN 2033 15YR KENYAN JAN 2033 BOND JAN 33S JAN 33 IFB KENYAN IFB JAN 2033 KENYAN IFB JAN 2033 IFB JAN 2033 IFB JANUARY 2033 JANUARY 2033 12.5% 12.50% 12.500% KENYAN INFRASTRUTURE BOND JAN 2033", 
             currency: "KShs", 
             country: "KE", 
             bondType: "IFB", 
@@ -472,10 +487,25 @@ export default function App() {
             ]
         },
         { 
-            name: "13.9380% KENYAN INFRASTRUCTURE BOND OCT 2036", 
+            name: "11.7500% KENYAN IFB OCT 2035", 
+            couponRate: 11.75, 
+            maturityDate: "08-OCT-2035", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2019/016 IFB1/2019/16 08 OCT 2035 16YR KENYAN OCT 2035 BOND OCT 35S OCT 35 IFB KENYAN IFB OCT 2035 KENYAN IFB OCT 2035 IFB OCT 2035 IFB OCTOBER 2035 OCTOBER 2035 11.75% 11.750% KENYAN INFRASTRUTURE BOND OCT 2035", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "IFB", 
+            originalTenorYears: 16, 
+            whtRate: 0.0,
+            amortizationEvents: [
+                { date: "14-OCT-2030", percent: 50 },
+                { date: "08-OCT-2035", percent: 50 }
+            ]
+        },
+        { 
+            name: "13.9380% KENYAN IFB OCT 2036", 
             couponRate: 13.938, 
             maturityDate: "27-OCT-2036", 
-            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2022/14 27 OCT 2036 14YR KENYAN OCT 2036 BOND OCT 36S OCT 36 IFB IFB1/2022/014 KENYAN INFRASTRUCTURE BOND OCT 2036", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2022/14 27 OCT 2036 14YR KENYAN OCT 2036 BOND OCT 36S OCT 36 IFB IFB1/2022/014 KENYAN IFB OCT 2036", 
             currency: "KShs", 
             country: "KE", 
             bondType: "IFB", 
@@ -487,10 +517,10 @@ export default function App() {
             ]
         },
         { 
-            name: "12.2570% KENYAN INFRASTRUCTURE BOND JAN 2037", 
+            name: "12.2570% KENYAN IFB JAN 2037", 
             couponRate: 12.257, 
             maturityDate: "05-JAN-2037", 
-            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2021/016 IFB1/2021/16 05 JAN 2037 16YR KENYAN JAN 2037 BOND JAN 37S JAN 37 IFB KENYAN INFRASTRUCTURE BOND JAN 2037 KENYAN IFB JAN 2037 IFB JAN 2037 IFB JANUARY 2037 JANUARY 2037 12.257% 12.26% KENYAN INFRASTRUTURE BOND JAN 2037", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2021/016 IFB1/2021/16 05 JAN 2037 16YR KENYAN JAN 2037 BOND JAN 37S JAN 37 IFB KENYAN IFB JAN 2037 KENYAN IFB JAN 2037 IFB JAN 2037 IFB JANUARY 2037 JANUARY 2037 12.257% 12.26% KENYAN INFRASTRUTURE BOND JAN 2037", 
             currency: "KShs", 
             country: "KE", 
             bondType: "IFB", 
@@ -502,10 +532,26 @@ export default function App() {
             ]
         },
         { 
-            name: "12.6670% KENYAN INFRASTRUCTURE BOND MAR 2039", 
+            name: "11.9500% KENYAN IFB OCT 2038", 
+            couponRate: 11.95, 
+            maturityDate: "25-OCT-2038", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2018/20 IFB1/2018/020 IFB 1/2018/20 KE5000009109 25 OCT 2038 20YR KENYAN OCT 2038 BOND OCT 38S OCT 38 IFB KENYAN IFB OCT 2038 KENYAN IFB OCT 2038 IFB OCT 2038 IFB OCTOBER 2038 OCTOBER 2038 11.95% 11.950% 11.9500% KENYAN INFRASTRUTURE BOND OCT 2038", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "IFB", 
+            originalTenorYears: 20, 
+            whtRate: 0.0,
+            amortizationEvents: [
+                { date: "06-NOV-2028", percent: 50 },
+                { date: "31-OCT-2033", percent: 25 },
+                { date: "25-OCT-2038", percent: 25 }
+            ]
+        },
+        { 
+            name: "12.6670% KENYAN IFB MAR 2039", 
             couponRate: 12.667, 
             maturityDate: "21-MAR-2039", 
-            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2021/018 IFB1/2021/18 21 MAR 2039 18YR KENYAN MAR 2039 BOND MAR 39S MAR 39 IFB KENYAN INFRASTRUCTURE BOND MAR 2039 KENYAN IFB MAR 2039 IFB MAR 2039 IFB MARCH 2039 MARCH 2039 12.667% KENYAN INFRASTRUTURE BOND MAR 2039", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2021/018 IFB1/2021/18 21 MAR 2039 18YR KENYAN MAR 2039 BOND MAR 39S MAR 39 IFB KENYAN IFB MAR 2039 KENYAN IFB MAR 2039 IFB MAR 2039 IFB MARCH 2039 MARCH 2039 12.667% KENYAN INFRASTRUTURE BOND MAR 2039", 
             currency: "KShs", 
             country: "KE", 
             bondType: "IFB", 
@@ -517,10 +563,10 @@ export default function App() {
             ]
         },
         { 
-            name: "14.3990% KENYAN INFRASTRUCTURE BOND FEB 2040", 
+            name: "14.3990% KENYAN IFB FEB 2040", 
             couponRate: 14.399, 
             maturityDate: "20-FEB-2040", 
-            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2023/17 20 FEB 2040 17YR KENYAN FEB 2040 BOND FEB 40S FEB 40 IFB IFB1/2023/017 KENYAN INFRASTRUCTURE BOND FEB 2040 KENYAN IFB FEB 2040 IFB FEB 2040 FEBRUARY 2040", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2023/17 20 FEB 2040 17YR KENYAN FEB 2040 BOND FEB 40S FEB 40 IFB IFB1/2023/017 KENYAN IFB FEB 2040 KENYAN IFB FEB 2040 IFB FEB 2040 FEBRUARY 2040", 
             currency: "KShs", 
             country: "KE", 
             bondType: "IFB", 
@@ -532,10 +578,10 @@ export default function App() {
             ]
         },
         { 
-            name: "13.7420% KENYAN INFRASTRUCTURE BOND MAY 2040", 
+            name: "13.7420% KENYAN IFB MAY 2040", 
             couponRate: 13.742, 
             maturityDate: "21-MAY-2040", 
-            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2022/18 21 MAY 2040 18YR KENYAN MAY 2040 BOND MAY 40S MAY 40 IFB IFB1/2022/018 KENYAN INFRASTRUCTURE BOND MAY 2040 KENYAN IFB MAY 2040 IFB MAY 2040 MAY 2040 13.742%", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2022/18 21 MAY 2040 18YR KENYAN MAY 2040 BOND MAY 40S MAY 40 IFB IFB1/2022/018 KENYAN IFB MAY 2040 KENYAN IFB MAY 2040 IFB MAY 2040 MAY 2040 13.742%", 
             currency: "KShs", 
             country: "KE", 
             bondType: "IFB", 
@@ -547,7 +593,7 @@ export default function App() {
             ]
         },
         { 
-            name: "12.9650% KENYAN INFRASTRUCTURE BOND JAN 2041", 
+            name: "12.9650% KENYAN IFB JAN 2041", 
             couponRate: 12.965, 
             maturityDate: "28-JAN-2041", 
             alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2022/019 28 JAN 2041 KENYAN JAN 2041 BOND JAN 41S JAN 41 IFB", 
@@ -562,10 +608,10 @@ export default function App() {
             ]
         },
         { 
-            name: "12.7370% KENYAN INFRASTRUCTURE BOND AUG 2042", 
+            name: "12.7370% KENYAN IFB AUG 2042", 
             couponRate: 12.737, 
             maturityDate: "18-AUG-2042", 
-            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2021/021 IFB1/2021/21 18 AUG 2042 21YR KENYAN AUG 2042 BOND AUG 42S AUG 42 IFB KENYAN INFRASTRUCTURE BOND AUG 2042 KENYAN IFB AUG 2042 IFB AUG 2042 IFB AUGUST 2042 AUGUST 2042 12.737% KENYAN INFRASTRUTURE BOND AUG 2042", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2021/021 IFB1/2021/21 18 AUG 2042 21YR KENYAN AUG 2042 BOND AUG 42S AUG 42 IFB KENYAN IFB AUG 2042 KENYAN IFB AUG 2042 IFB AUG 2042 IFB AUGUST 2042 AUGUST 2042 12.737% KENYAN INFRASTRUTURE BOND AUG 2042", 
             currency: "KShs", 
             country: "KE", 
             bondType: "IFB", 
@@ -574,6 +620,21 @@ export default function App() {
             amortizationEvents: [
                 { date: "01-SEP-2031", percent: 50 },
                 { date: "18-AUG-2042", percent: 50 }
+            ]
+        },
+        { 
+            name: "12.2000% KENYAN IFB FEB 2044", 
+            couponRate: 12.20, 
+            maturityDate: "22-FEB-2044", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2019/025 IFB1/2019/25 22 FEB 2044 25YR KENYAN FEB 2044 BOND FEB 44S FEB 44 IFB KENYAN IFB FEB 2044 KENYAN IFB FEB 2044 IFB FEB 2044 IFB FEBRUARY 2044 FEBRUARY 2044 12.2% 12.20% 12.200% KENYAN INFRASTRUTURE BOND FEB 2044", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "IFB", 
+            originalTenorYears: 25, 
+            whtRate: 0.0,
+            amortizationEvents: [
+                { date: "06-MAR-2034", percent: 50 },
+                { date: "22-FEB-2044", percent: 50 }
             ]
         },
         { 
@@ -997,7 +1058,7 @@ export default function App() {
         overrideCleanPrice?: number
     ) {
         const C = bond.couponRate / 100;
-        const isIFB = bond.bondType === 'IFB' || bond.name?.toUpperCase().includes('INFRASTRUCTURE');
+        const isIFB = bond.bondType === 'IFB' || bond.name?.toUpperCase().includes('INFRASTRUCTURE') || bond.name?.toUpperCase().includes('IFB');
         const originalTenorYears = bond.originalTenorYears || (isIFB ? 15 : 10);
         // Tax rate: IFBs are 100% tax-exempt. FXDs: 10% for >=10y, 15% for <10y.
         const whtRate = isIFB ? 0.0 : (originalTenorYears >= 10 ? 0.10 : 0.15);
@@ -1728,13 +1789,13 @@ export default function App() {
         const faceValueLabel = document.getElementById('faceValueLabel');
         if (faceValueLabel) faceValueLabel.textContent = `Face Value (${currency})`;
         const cleanPriceLabel = document.getElementById('cleanPriceLabel');
-        if (cleanPriceLabel) cleanPriceLabel.textContent = `Clean Price Computed (6 d.p. ${currency})`;
+        if (cleanPriceLabel) cleanPriceLabel.textContent = currency === 'KShs' ? 'Clean Price Computed' : `Clean Price Computed (6 d.p. ${currency})`;
         const considerationLabel = document.getElementById('considerationLabel');
         if (considerationLabel) considerationLabel.textContent = `Consideration (Total ${currency})`;
         const fullCleanPriceLabel = document.getElementById('fullCleanPriceLabel');
         if (fullCleanPriceLabel) fullCleanPriceLabel.textContent = `Full Clean Price (15 d.p. ${currency})`;
         const dirtyPriceLabel = document.getElementById('dirtyPriceLabel');
-        if (dirtyPriceLabel) dirtyPriceLabel.textContent = `Dirty Price Computed (${currency})`;
+        if (dirtyPriceLabel) dirtyPriceLabel.textContent = currency === 'KShs' ? `Dirty Price Computed (4 d.p. ${currency})` : `Dirty Price Computed (${currency})`;
     }
 
     function updateBondDetails() {
@@ -1910,15 +1971,55 @@ export default function App() {
             settlementDateInput.focus();
         }
     });
-    yieldToMaturityInput.addEventListener('input', calculateBondPrice);
+    yieldToMaturityInput.addEventListener('input', (event: any) => {
+        const input = event.target as HTMLInputElement;
+        const original = input.value;
+        const selStart = input.selectionStart ?? original.length;
+
+        // Allow only digits and a single decimal point, with at most 4 decimal places
+        let cleaned = '';
+        let seenDot = false;
+        let removedBeforeCursor = 0;
+
+        for (let i = 0; i < original.length; i++) {
+            const ch = original[i];
+            if (ch >= '0' && ch <= '9') {
+                cleaned += ch;
+            } else if (ch === '.' && !seenDot) {
+                cleaned += ch;
+                seenDot = true;
+            } else if (i < selStart) {
+                removedBeforeCursor++;
+            }
+        }
+
+        const dotIdx = cleaned.indexOf('.');
+        if (dotIdx !== -1) {
+            const intPart = cleaned.slice(0, dotIdx);
+            const decPart = cleaned.slice(dotIdx + 1);
+            if (decPart.length > 4) {
+                cleaned = intPart + '.' + decPart.slice(0, 4);
+            }
+        }
+
+        if (cleaned !== original) {
+            input.value = cleaned;
+            const nextCursor = Math.min(cleaned.length, Math.max(0, selStart - removedBeforeCursor));
+            input.setSelectionRange(nextCursor, nextCursor);
+        }
+
+        calculateBondPrice();
+    });
     yieldToMaturityInput.addEventListener('blur', (event: any) => {
-        const value = event.target.value;
-        if (value !== '') {
-            const num = parseFloat(value);
+        const raw = String(event.target.value || '').trim();
+        if (raw !== '') {
+            const num = parseFloat(raw);
             if (!isNaN(num)) {
-                // If a Kenyan bond is selected, maintain 4 decimal places
                 const isKenyan = selectedBondIndex !== -1 && isKenyanBond(bonds[selectedBondIndex]);
-                event.target.value = isKenyan ? num.toFixed(4) : num.toFixed(2);
+                const dps = getDecimalPlaces(raw);
+                const targetDps = isKenyan ? 4 : Math.min(4, Math.max(2, dps));
+                event.target.value = (Math.round(num * 10000) / 10000).toFixed(targetDps);
+                calculateBondPrice();
             }
         }
     });
@@ -2249,10 +2350,10 @@ export default function App() {
                     Yield to Maturity (%) {kenyanAnalytics && <span className="text-xs font-normal text-emerald-700 font-sans ml-1">(NSE Agreed Quote Anchor)</span>}
                 </label>
                 <input 
-                    type="number" 
-                    step={kenyanAnalytics ? "0.0001" : "0.01"} 
+                    type="text" 
+                    inputMode="decimal"
                     id="yieldToMaturity" 
-                    placeholder={kenyanAnalytics ? "e.g. 12.9650" : "e.g. 15.80"} 
+                    placeholder={kenyanAnalytics ? "e.g. 12.9650" : "e.g. 15.8000"} 
                     className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" 
                 />
             </div>
@@ -2491,7 +2592,7 @@ export default function App() {
 
             {/* 1. BOND CLEAN PRICE CALCULATED */}
             <div>
-                <label id="cleanPriceLabel" htmlFor="calculatedBondPriceInput" className="block text-sm font-semibold text-gray-700">Clean Price Computed (6 d.p. {currencySymbol})</label>
+                <label id="cleanPriceLabel" htmlFor="calculatedBondPriceInput" className="block text-sm font-semibold text-gray-700">{activeMarket === 'KE' ? 'Clean Price Computed' : `Clean Price Computed (6 d.p. ${currencySymbol})`}</label>
                 <input type="text" id="calculatedBondPriceInput" defaultValue="0.000000" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 font-medium focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
             </div>
 
@@ -2522,7 +2623,7 @@ export default function App() {
             {/* 2. BOND DIRTY PRICE CALCULATED (EDITABLE & BIDIRECTIONAL) */}
             <div>
                 <div className="flex items-center justify-between">
-                    <label id="dirtyPriceLabel" htmlFor="bondDirtyPriceInput" className="block text-sm font-semibold text-gray-700">Dirty Price Computed ({currencySymbol})</label>
+                    <label id="dirtyPriceLabel" htmlFor="bondDirtyPriceInput" className="block text-sm font-semibold text-gray-700">{activeMarket === 'KE' ? `Dirty Price Computed (4 d.p. ${currencySymbol})` : `Dirty Price Computed (${currencySymbol})`}</label>
                     <span className="text-[11px] text-emerald-700 font-medium">Editable (Bidirectional)</span>
                 </div>
                 <input type="text" id="bondDirtyPriceInput" defaultValue="0.00" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
