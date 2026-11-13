@@ -866,10 +866,14 @@ export default function App() {
     // --- NIGERIAN BOND PRICING ENGINE (UNTOUCHED: Actual/Actual, ICMA) ---
     // =========================================================================
     function findCouponDates(settlement: Date, maturity: Date, frequency: number) {
-        let next = new Date(maturity);
-        let last = new Date(maturity);
+        const sett = new Date(settlement);
+        sett.setHours(0, 0, 0, 0);
+        const mat = new Date(maturity);
+        mat.setHours(0, 0, 0, 0);
+        let next = new Date(mat);
+        let last = new Date(mat);
         
-        while (next.getTime() > settlement.getTime()) {
+        while (next.getTime() > sett.getTime()) {
             last = new Date(next);
             const m = next.getMonth();
             const y = next.getFullYear();
@@ -877,9 +881,9 @@ export default function App() {
             let targetM = m - step;
             let targetY = y;
             if (targetM < 0) { targetM += 12; targetY -= 1; }
-            next = new Date(targetY, targetM, maturity.getDate());
+            next = new Date(targetY, targetM, mat.getDate());
             
-            if (next.getDate() !== maturity.getDate()) {
+            if (next.getDate() !== mat.getDate()) {
                 next = new Date(targetY, targetM + 1, 0);
             }
             next.setHours(0, 0, 0, 0);
@@ -917,6 +921,12 @@ export default function App() {
         }
         
         const frac_exp = (E > 0) ? (DSC / E) : 0;
+
+        // Bloomberg (BBG YAS) / Excel PRICE / FMDQ standard convention:
+        // In the final coupon period (N === 1), discounting uses simple interest rather than compound exponentiation.
+        if (N === 1) {
+            return (redemption + Coup) / (1 + r * frac_exp);
+        }
         
         let dirty_price = 0.0;
         for (let k = 1; k <= N; k++) {
@@ -976,6 +986,13 @@ export default function App() {
         const AI = (E > 0) ? Coup * (A / E) : 0;
 
         const targetDirtyPrice = targetCleanPrice + AI;
+        const DSC = getDayDifference(settlement, ncc);
+
+        // Exact closed-form Bloomberg (BBG YAS) / Excel YIELD simple-interest yield when in final coupon period (N === 1)
+        if (getDayDifference(ncc, maturity) === 0 && DSC > 0 && E > 0 && targetDirtyPrice > 0) {
+            const simpleYield = F * (((redemption + Coup) / targetDirtyPrice) - 1) * (E / DSC);
+            return Math.max(0, simpleYield);
+        }
 
         let lowYield = 0.0;
         let highYield = 2.0;
