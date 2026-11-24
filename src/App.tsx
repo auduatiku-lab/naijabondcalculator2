@@ -520,6 +520,22 @@ export default function App() {
             ]
         },
         { 
+            name: "18.4607% KENYA IFB AUG 2032", 
+            couponRate: 18.4607, 
+            maturityDate: "09-AUG-2032", 
+            alias: "KENYA TREASURY INFRASTRUCTURE BOND IFB1/2024/8.5 IFB1/2024/008.5 IFB1/2024/8.5Y IFB 1/2024/8.5 KE8000006430 09 AUG 2032 8.5YR KENYA AUG 2032 BOND KENYAN AUG 2032 BOND AUG 32S AUG 32 IFB KENYA IFB AUG 2032 KENYAN IFB AUG 2032 IFB AUG 2032 IFB AUGUST 2032 AUGUST 2032 18.46% 18.461% 18.4607% KENYAN INFRASTRUCTURE BOND AUG 2032 KENYAN INFRASTRUTURE BOND AUG 2032", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "IFB", 
+            originalTenorYears: 8.5, 
+            whtRate: 0.0,
+            amortizationEvents: [
+                { date: "15-FEB-2027", percent: 20 },
+                { date: "11-FEB-2030", percent: 24 },
+                { date: "09-AUG-2032", percent: 56 }
+            ]
+        },
+        { 
             name: "12.5000% KENYA IFB JAN 2033", 
             couponRate: 12.50, 
             maturityDate: "10-JAN-2033", 
