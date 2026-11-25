@@ -2223,16 +2223,16 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex items-center justify-center min-h-screen antialiased p-4 py-8 bg-gray-50" style={{ fontFamily: "'Neue Frutiger', 'Frutiger', 'Inter', sans-serif" }}>
+    <div className="flex items-start justify-center min-h-screen antialiased px-4 pt-1.5 pb-6 sm:pt-2 bg-gray-50" style={{ fontFamily: "'Neue Frutiger', 'Frutiger', 'Inter', sans-serif" }}>
       {/* Main Container */}
-      <div className="w-full max-w-xl bg-white border border-gray-200 rounded-xl shadow-xl pt-3 sm:pt-4 px-6 sm:px-8 pb-6 sm:pb-8 space-y-6">
+      <div className="w-full max-w-xl bg-white border border-gray-200 rounded-xl shadow-xl pt-2.5 sm:pt-3 px-5 sm:px-7 pb-5 sm:pb-6 space-y-4">
         
         {/* Input Form */}
-        <div className="space-y-4">
+        <div className="space-y-2.5">
             {/* Face Value */}
             <div>
                 <label id="faceValueLabel" htmlFor="faceValue" className="block text-sm font-semibold text-gray-700">Face Value ({currencySymbol})</label>
-                <input type="text" id="faceValue" placeholder="e.g. 1b, or 1e9 or 1,000,000,000" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
+                <input type="text" id="faceValue" placeholder="e.g. 1b, or 1e9 or 1,000,000,000" className="mt-0.5 block w-full px-3 py-1.5 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
             </div>
 
             {/* Select Bond (Custom Searchable Dropdown) */}
@@ -2243,7 +2243,7 @@ export default function App() {
                         type="text" 
                         id="bondSearchInput" 
                         placeholder="Select or Type Bond" 
-                        className="text-sm sm:text-base mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" 
+                        className="text-sm sm:text-base mt-0.5 block w-full px-3 py-1.5 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" 
                     />
                     {/* Subtle, almost unnoticeable clickable 'x' positioned exactly 10px after the last character */}
                     <button
@@ -2251,7 +2251,7 @@ export default function App() {
                         id="clearBondBtn"
                         aria-label="Clear selected bond"
                         title="Clear selected bond"
-                        className="absolute top-1/2 -translate-y-1/2 mt-0.5 flex items-center justify-center cursor-pointer transition-opacity duration-150 hidden group z-10"
+                        className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer transition-opacity duration-150 hidden group z-10"
                     >
                         <span className="flex items-center justify-center w-4 h-4 rounded-full text-red-300/70 hover:text-red-500 hover:bg-red-50/60 transition-all opacity-65 hover:opacity-100">
                             <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -2269,14 +2269,14 @@ export default function App() {
             {/* ISIN Number (Auto-populated when a bond is selected) */}
             <div>
                 <label htmlFor="bondIsin" className="block text-sm font-semibold text-gray-700">ISIN Number</label>
-                <div className="relative mt-1">
+                <div className="relative mt-0.5">
                     <input
                         type="text"
                         id="bondIsin"
                         value={selectedBondIsin}
                         placeholder="To be Determined"
                         readOnly
-                        className="block w-full px-3 py-2 pr-16 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 font-mono text-sm sm:text-base tracking-wide focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm"
+                        className="block w-full px-3 py-1.5 pr-16 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 font-mono text-sm sm:text-base tracking-wide focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm"
                     />
                     {selectedBondIsin && selectedBondIsin !== 'N/A' && (
                         <button
@@ -2291,7 +2291,7 @@ export default function App() {
                             }}
                             title="Copy ISIN"
                             aria-label="Copy ISIN"
-                            className="absolute inset-y-0 right-1.5 my-auto h-7 px-2 rounded text-xs font-semibold text-gray-500 hover:text-blue-700 hover:bg-white/80 transition-colors cursor-pointer"
+                            className="absolute inset-y-0 right-1.5 my-auto h-6 px-2 rounded text-xs font-semibold text-gray-500 hover:text-blue-700 hover:bg-white/80 transition-colors cursor-pointer"
                         >
                             {isinCopied ? 'Copied' : 'Copy'}
                         </button>
@@ -2501,7 +2501,7 @@ export default function App() {
                     inputMode="decimal"
                     id="yieldToMaturity" 
                     placeholder={kenyanAnalytics ? "e.g. 12.9650" : "e.g. 15.8000"} 
-                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" 
+                    className="mt-0.5 block w-full px-3 py-1.5 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" 
                 />
             </div>
 
@@ -2517,7 +2517,7 @@ export default function App() {
                         type="text" 
                         id="settlementDate" 
                         placeholder="e.g. 3 Nov 2026 or 2026-11-03" 
-                        className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" 
+                        className="mt-0.5 block w-full px-3 py-1.5 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" 
                     />
                     {/* Calendar Toggle Button */}
                     <button ref={calendarToggleRef} type="button" id="calendarToggle" aria-label="Toggle Calendar" className="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none group cursor-pointer">
@@ -2531,7 +2531,7 @@ export default function App() {
                 </div>
 
                 {/* Quick Date Shortcuts (Factors in Kenyan & Nigerian Public Holidays & Weekends) */}
-                <div className="mt-2 space-y-1.5">
+                <div className="mt-1.5 space-y-1">
                     <div className="flex flex-wrap items-center justify-between text-[11px] gap-1">
                         <div className="flex items-center gap-1.5 font-semibold text-gray-700">
                             <span>Quick Dates:</span>
@@ -2600,7 +2600,7 @@ export default function App() {
                 </div>
                 
                 {/* Calendar Popover */}
-                <div ref={calendarPopoverRef} id="calendar-popover" className="absolute z-50 p-4 bg-white border border-gray-200 rounded-lg shadow-2xl w-72 md:w-84 right-0 sm:right-4 top-16" style={{ display: isCalendarOpen ? 'block' : 'none' }}>
+                <div ref={calendarPopoverRef} id="calendar-popover" className="absolute z-50 p-4 bg-white border border-gray-200 rounded-lg shadow-2xl w-72 md:w-84 right-0 sm:right-4 top-14" style={{ display: isCalendarOpen ? 'block' : 'none' }}>
                     {/* Market Header */}
                     <div className="mb-2 pb-1.5 border-b border-gray-100 flex items-center justify-between text-[11px]">
                         <span className="font-semibold text-gray-700">
@@ -2740,7 +2740,7 @@ export default function App() {
             {/* 1. BOND CLEAN PRICE CALCULATED */}
             <div>
                 <label id="cleanPriceLabel" htmlFor="calculatedBondPriceInput" className="block text-sm font-semibold text-gray-700">{activeMarket === 'KE' ? 'Clean Price Computed' : `Clean Price Computed (6 d.p. ${currencySymbol})`}</label>
-                <input type="text" id="calculatedBondPriceInput" defaultValue="0.000000" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 font-medium focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
+                <input type="text" id="calculatedBondPriceInput" defaultValue="0.000000" className="mt-0.5 block w-full px-3 py-1.5 bg-white border border-gray-300 rounded-md text-gray-900 font-medium focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
             </div>
 
             {/* 3. CONSIDERATION CALCULATED */}
@@ -2757,14 +2757,14 @@ export default function App() {
                     type="text" 
                     id="considerationCalculatedInput" 
                     defaultValue="0.00" 
-                    className="mt-1 block w-full px-3 py-2 bg-slate-50/80 border border-slate-300 rounded-md text-gray-900 font-bold text-[15px] sm:text-base focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 shadow-xs" 
+                    className="mt-0.5 block w-full px-3 py-1.5 bg-slate-50/80 border border-slate-300 rounded-md text-gray-900 font-bold text-[15px] sm:text-base focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 shadow-xs" 
                 />
             </div>
 
             {/* 4. FULL CLEAN PRICE */}
             <div>
                 <label id="fullCleanPriceLabel" htmlFor="fullCleanPriceInput" className="block text-sm font-semibold text-gray-700">Full Clean Price (15 d.p. {currencySymbol})</label>
-                <input type="text" id="fullCleanPriceInput" defaultValue="0.000000000000000" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm font-mono text-sm" readOnly />
+                <input type="text" id="fullCleanPriceInput" defaultValue="0.000000000000000" className="mt-0.5 block w-full px-3 py-1.5 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm font-mono text-sm" readOnly />
             </div>
 
             {/* 2. BOND DIRTY PRICE CALCULATED (EDITABLE & BIDIRECTIONAL) */}
@@ -2773,25 +2773,25 @@ export default function App() {
                     <label id="dirtyPriceLabel" htmlFor="bondDirtyPriceInput" className="block text-sm font-semibold text-gray-700">{activeMarket === 'KE' ? `Dirty Price Computed (4 d.p. ${currencySymbol})` : `Dirty Price Computed (${currencySymbol})`}</label>
                     <span className="text-[11px] text-emerald-700 font-medium">Editable (Bidirectional)</span>
                 </div>
-                <input type="text" id="bondDirtyPriceInput" defaultValue="0.00" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
+                <input type="text" id="bondDirtyPriceInput" defaultValue="0.00" className="mt-0.5 block w-full px-3 py-1.5 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
             </div>
 
             {/* Coupon Rate */}
             <div>
                 <label htmlFor="couponRate" className="block text-sm font-semibold text-gray-700">Coupon Rate (%)</label>
-                <input type="text" id="couponRate" placeholder="To be Determined" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
+                <input type="text" id="couponRate" placeholder="To be Determined" className="mt-0.5 block w-full px-3 py-1.5 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
             </div>
 
             {/* Maturity Date */}
             <div>
                 <label htmlFor="maturityDate" className="block text-sm font-semibold text-gray-700">Maturity Date</label>
-                <input type="text" id="maturityDate" placeholder="To be Determined" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
+                <input type="text" id="maturityDate" placeholder="To be Determined" className="mt-0.5 block w-full px-3 py-1.5 bg-white border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" />
             </div>
              
             {/* Years to Maturity */}
             <div>
                 <label htmlFor="yearsToMaturity" className="block text-sm font-semibold text-gray-700">Time to Maturity</label>
-                <input type="text" id="yearsToMaturity" defaultValue="" data-total-years="" className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" readOnly />
+                <input type="text" id="yearsToMaturity" defaultValue="" data-total-years="" className="mt-0.5 block w-full px-3 py-1.5 bg-gray-100 border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm" readOnly />
             </div>
 
         </div>
