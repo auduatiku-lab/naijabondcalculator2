@@ -565,6 +565,18 @@ export default function App() {
             ]
         },
         { 
+            name: "FXD1/2010/025 (11.25% MAY 2035)", 
+            couponRate: 11.25, 
+            maturityDate: "28-MAY-2035", 
+            isin: "KE4000003089",
+            alias: "11.2500% KENYA BOND MAY 2035 KENYA TREASURY BOND FXD1/2010/25 FXD1/2010/025 FXD 1/2010/25 FXD1/2010/25YR KE4000003089 28 MAY 2035 25YR KENYA MAY 2035 BOND KENYAN MAY 2035 BOND MAY 35S MAY 35 FXD FXD MAY 2035 KENYA FXD MAY 2035 KENYAN FXD MAY 2035 11.25% 11.250% 11.2500%", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "FXD", 
+            originalTenorYears: 25, 
+            whtRate: 0.10 
+        },
+        { 
             name: "11.7500% KENYA IFB OCT 2035", 
             couponRate: 11.75, 
             maturityDate: "08-OCT-2035", 
