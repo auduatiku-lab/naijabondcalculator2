@@ -387,6 +387,18 @@ export default function App() {
 
     const kenyanBonds: BondItem[] = [
         { 
+            name: "FXD1/2024/003 (18.3854% JAN 2027)", 
+            couponRate: 18.3854, 
+            maturityDate: "11-JAN-2027", 
+            isin: "KE8000006323",
+            alias: "FXD1/2024/3Yr FXD1/2024/3 FXD1/2024/03 FXD1/2024/003 FXD 1/2024/3 18.3854% KENYA BOND JAN 2027 KENYA TREASURY BOND KE8000006323 11 JAN 2027 3YR KENYA JAN 2027 BOND KENYAN JAN 2027 BOND JAN 27S JAN 27 FXD FXD JAN 2027 KENYA FXD JAN 2027 KENYAN FXD JAN 2027 JANUARY 2027 18.3854% 18.39%", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "FXD", 
+            originalTenorYears: 3, 
+            whtRate: 0.15 
+        },
+        { 
             name: "11.0000% KENYA IFB MAR 2027", 
             couponRate: 11.00, 
             maturityDate: "15-MAR-2027", 
