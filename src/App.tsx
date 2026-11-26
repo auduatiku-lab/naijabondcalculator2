@@ -416,6 +416,18 @@ export default function App() {
             ]
         },
         { 
+            name: "FXD1/2023/005 (16.844% JUL 2028)", 
+            couponRate: 16.844, 
+            maturityDate: "10-JUL-2028", 
+            isin: "KE8000005986",
+            alias: "FXD1/2023/5Yr FXD1/2023/5 FXD1/2023/05 FXD1/2023/005 FXD 1/2023/5 16.8440% KENYA BOND JUL 2028 KENYA TREASURY BOND KE8000005986 10 JUL 2028 5YR KENYA JUL 2028 BOND KENYAN JUL 2028 BOND JUL 28S JUL 28 FXD FXD JUL 2028 KENYA FXD JUL 2028 KENYAN FXD JUL 2028 JULY 2028 16.84% 16.844% 16.8440%", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "FXD", 
+            originalTenorYears: 5, 
+            whtRate: 0.15 
+        },
+        { 
             name: "13.2150% KENYA IFB NOV 2028", 
             couponRate: 13.215, 
             maturityDate: "27-NOV-2028", 
