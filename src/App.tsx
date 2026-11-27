@@ -416,6 +416,18 @@ export default function App() {
             ]
         },
         { 
+            name: "FXD1/2017/010 (12.966% JUL 2027)", 
+            couponRate: 12.966, 
+            maturityDate: "19-JUL-2027", 
+            isin: "KE5000007327",
+            alias: "FXD1/2017/10Yr FXD1/2017/10 FXD1/2017/010 FXD 1/2017/10 12.9660% KENYA BOND JUL 2027 KENYA TREASURY BOND KE5000007327 19 JUL 2027 10YR KENYA JUL 2027 BOND KENYAN JUL 2027 BOND JUL 27S JUL 27 FXD FXD JUL 2027 KENYA FXD JUL 2027 KENYAN FXD JUL 2027 JULY 2027 12.97% 12.966% 12.9660%", 
+            currency: "KShs", 
+            country: "KE", 
+            bondType: "FXD", 
+            originalTenorYears: 10, 
+            whtRate: 0.10 
+        },
+        { 
             name: "FXD1/2023/005 (16.844% JUL 2028)", 
             couponRate: 16.844, 
             maturityDate: "10-JUL-2028", 
